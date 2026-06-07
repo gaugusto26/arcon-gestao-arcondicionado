@@ -124,10 +124,7 @@ function renderAuthScreen(mode = 'login') {
               <label>Nome</label>
               <input type="text" id="auth-name" class="form-control" required placeholder="Nome do usuario">
             </div>
-            <div class="form-group">
-              <label>Nome do aplicativo</label>
-              <input type="text" id="auth-app-name" class="form-control" value="${appName}" placeholder="Ex: Arcon">
-            </div>
+
             <div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); border-radius:10px; padding:11px; margin-bottom:14px;">
               <p id="auth-mode-help" style="font-size:10px; opacity:0.78; margin:0; line-height:1.5;">Como autonomo, este administrador tera acesso completo ao sistema.</p>
             </div>
@@ -157,7 +154,7 @@ function renderAuthScreen(mode = 'login') {
           name: document.getElementById('auth-name').value,
           login: document.getElementById('auth-login').value,
           password: document.getElementById('auth-password').value,
-          appName: document.getElementById('auth-app-name')?.value,
+          appName: 'Arcon',
           businessMode: document.getElementById('auth-business-mode')?.value
         });
       } else {

@@ -72,11 +72,6 @@ export async function renderMais(mainContent, headerContent) {
               SENHA
             </button>
           </div>
-          ${isAdmin ? `
-          <div style="background:rgba(255,255,255,0.04); border-radius:8px; padding:12px;">
-            <label style="font-size:9px; opacity:0.65; font-weight:800;">APLICATIVO</label>
-            <p style="margin:5px 0 0 0; font-size:13px; font-weight:800;">${tech.appName}</p>
-          </div>` : ''}
           <button class="btn-primary" onclick="window.logoutApp()" style="background:#ef4444; color:#fff; margin-top:0;">
             <span class="material-symbols-rounded" style="font-size:16px;">logout</span>
             SAIR
