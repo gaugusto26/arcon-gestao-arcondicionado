@@ -22,15 +22,15 @@ export const pdfService = {
           </style>
         </head>
         <body>
-          <div class="header"><div class="title">${tech?.appName || 'AR JAMPA'}</div><div>Recibo de Prestacao de Servico</div></div>
+          <div class="header"><div class="title">${tech?.appName || 'AR JAMPA'}</div><div>Recibo de Prestação de Serviço</div></div>
           <div class="info-group"><label>Cliente</label><p>${client?.nome || 'N/A'} ${unit ? ` - ${unit.apartamento} (${unit.proprietario})` : ''}</p></div>
-          <div class="info-group"><label>Endereco</label><p>${client?.endereco || 'N/A'}</p></div>
+          <div class="info-group"><label>Endereço</label><p>${client?.endereco || 'N/A'}</p></div>
           <div class="info-group"><label>Equipamento</label><p>${equipment ? `${equipment.marca} - ${equipment.btu} BTU - ${equipment.localizacao}` : 'N/A'}</p></div>
           <div class="info-group"><label>Data</label><p>${new Date(maintenance.dataRealizada).toLocaleDateString('pt-BR')}</p></div>
-          <div class="info-group"><label>Servico</label><p>${maintenance.descricao || ''}</p></div>
+          <div class="info-group"><label>Serviço</label><p>${maintenance.descricao || ''}</p></div>
           ${maintenance.foto ? `<div class="info-group"><label>Foto</label><br><img src="${maintenance.foto}" class="service-photo"></div>` : ''}
           <div class="value-box"><h3>VALOR TOTAL (${maintenance.formaPagamento || '-'})</h3><p>R$ ${Number(maintenance.valor || 0).toFixed(2)}</p></div>
-          <div class="footer"><p>Servico realizado por <strong>${tech?.name || 'Tecnico'}</strong></p><p>Este documento e um recibo nao fiscal.</p></div>
+          <div class="footer"><p>Serviço realizado por <strong>${tech?.name || 'Técnico'}</strong></p><p>Este documento é um recibo não fiscal.</p></div>
         </body>
       </html>
     `);
@@ -51,7 +51,7 @@ export const pdfService = {
         <head><title>Relatorio ${monthData.month}</title></head>
         <body style="font-family: Arial, sans-serif; padding: 40px;">
           <h1>${tech?.appName || 'AR JAMPA'}</h1>
-          <h2>Relatorio mensal - ${monthData.month}</h2>
+          <h2>Relatório mensal - ${monthData.month}</h2>
           <p><strong>Recebido:</strong> R$ ${Number(monthData.recebido || 0).toFixed(2)}</p>
           <p><strong>A receber:</strong> R$ ${Number(monthData.pendente || 0).toFixed(2)}</p>
           <p><strong>Total bruto:</strong> R$ ${Number(monthData.totalBruto || 0).toFixed(2)}</p>

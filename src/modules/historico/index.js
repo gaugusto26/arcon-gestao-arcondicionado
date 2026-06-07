@@ -53,7 +53,7 @@ export async function renderHistorico(mainContent, headerContent) {
         const msg = encodeURIComponent(
           `*RECIBO DE SERVIÇO*\n\n` +
           `*Cliente:* ${c?.nome}\n` +
-          `*Aparelho:* ${e ? `${e.marca} - ${e.localizacao}` : 'Servico geral do cliente'}\n` +
+          `*Aparelho:* ${e ? `${e.marca} - ${e.localizacao}` : 'Serviço geral do cliente'}\n` +
           `*Data:* ${formatDateTime(m.dataRealizada || m.dataAgendada)}\n` +
           `*Serviço:* ${m.descricao}\n` +
           `*Valor:* R$ ${Number(m.valor || 0).toFixed(2)} (${m.formaPagamento || 'N/A'})\n\n` +
@@ -107,7 +107,7 @@ export async function renderHistorico(mainContent, headerContent) {
                     border-radius:15px; margin-top:12px; line-height:1.5; color:#eee;">
             ${m.descricao}
           </p>
-          ${e ? `<p style="font-size:10px; opacity:0.55; margin-top:-6px;">${e.marca} • ${e.localizacao || 'Local nao informado'}</p>` : '<p style="font-size:10px; opacity:0.55; margin-top:-6px;">Servico geral do cliente</p>'}
+          ${e ? `<p style="font-size:10px; opacity:0.55; margin-top:-6px;">${e.marca} • ${e.localizacao || 'Local não informado'}</p>` : '<p style="font-size:10px; opacity:0.55; margin-top:-6px;">Serviço geral do cliente</p>'}
           
           ${imgHtml}
           

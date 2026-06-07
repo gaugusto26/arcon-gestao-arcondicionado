@@ -4,14 +4,14 @@ export function isContactPickerSupported() {
 
 export async function pickContactsFromDevice() {
   if (!isContactPickerSupported()) {
-    throw new Error('Contact Picker API nao suportada neste navegador.');
+    throw new Error('Contact Picker API não suportada neste navegador.');
   }
 
   const availableProperties = await navigator.contacts.getProperties();
   const properties = ['name', 'tel'].filter((property) => availableProperties.includes(property));
 
   if (!properties.includes('tel')) {
-    throw new Error('Este navegador nao liberou telefones dos contatos.');
+    throw new Error('Este navegador não liberou telefones dos contatos.');
   }
 
   return navigator.contacts.select(properties, { multiple: true });

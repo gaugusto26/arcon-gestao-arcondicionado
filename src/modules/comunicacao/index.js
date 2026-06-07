@@ -75,12 +75,12 @@ async function getAutomationItems() {
     .filter((equipamento) => equipamento.proximaManutencao && daysUntil(equipamento.proximaManutencao) < 0)
     .map((equipamento) => {
       const cliente = clientes.find((item) => item.id === equipamento.clienteId);
-      const message = `Ola, ${cliente?.nome || 'tudo bem'}! Identifiquei aqui que a manutencao do seu ar-condicionado (${equipamento.marca} - ${equipamento.localizacao || 'local nao informado'}) venceu em ${formatDateTime(equipamento.proximaManutencao)}. Podemos agendar uma visita?`;
+      const message = `Olá, ${cliente?.nome || 'tudo bem'}! Identifiquei aqui que a manutenção do seu ar-condicionado (${equipamento.marca} - ${equipamento.localizacao || 'local não informado'}) venceu em ${formatDateTime(equipamento.proximaManutencao)}. Podemos agendar uma visita?`;
       return {
         id: `vencida-${equipamento.id}`,
         type: 'vencida',
         title: cliente?.nome || 'Cliente',
-        subtitle: `${equipamento.marca} - ${equipamento.localizacao || 'Local nao informado'}`,
+        subtitle: `${equipamento.marca} - ${equipamento.localizacao || 'Local não informado'}`,
         date: equipamento.proximaManutencao,
         phone: cliente?.whatsapp,
         clienteId: cliente?.id,
@@ -95,12 +95,12 @@ async function getAutomationItems() {
       const cliente = clientes.find((item) => item.id === service.clientId);
       const equipamento = equipamentos.find((item) => item.id === service.equipamentoId);
       const address = buildAddress(cliente);
-      const message = `Ola, ${cliente?.nome || 'tudo bem'}! Passando para confirmar seu agendamento de ${service.tipoServico || 'servico'} para ${formatDateTime(service.dataAgendada)}${equipamento ? ` no equipamento ${equipamento.marca} - ${equipamento.localizacao || 'local nao informado'}` : ''}${address ? `, no endereco ${address}` : ''}. Esta confirmado?`;
+      const message = `Olá, ${cliente?.nome || 'tudo bem'}! Passando para confirmar seu agendamento de ${service.tipoServico || 'serviço'} para ${formatDateTime(service.dataAgendada)}${equipamento ? ` no equipamento ${equipamento.marca} - ${equipamento.localizacao || 'local não informado'}` : ''}${address ? `, no endereço ${address}` : ''}. Está confirmado?`;
       return {
         id: `agendada-${service.id}`,
         type: 'agendada',
         title: cliente?.nome || 'Cliente',
-        subtitle: service.tipoServico || 'Servico agendado',
+        subtitle: service.tipoServico || 'Serviço agendado',
         date: service.dataAgendada,
         phone: cliente?.whatsapp,
         clienteId: cliente?.id,

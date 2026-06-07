@@ -106,27 +106,27 @@ function renderAuthScreen(mode = 'login') {
         <form id="auth-form">
           ${isCadastro ? `
             <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:12px; margin:18px 0;">
-              <p style="font-size:11px; opacity:0.72; margin:0; line-height:1.5;">Cadastro exclusivo para administradores. Tecnicos sao cadastrados apenas dentro do painel administrativo da empresa.</p>
+              <p style="font-size:11px; opacity:0.72; margin:0; line-height:1.5;">Cadastro exclusivo para administradores. Técnicos são cadastrados apenas dentro do painel administrativo da empresa.</p>
             </div>
             <div class="form-group">
               <label>Modelo de trabalho</label>
               <select id="auth-business-mode" class="form-control">
-                <option value="autonomo">Sou autonomo</option>
-                <option value="empresa">Trabalho com mais tecnicos</option>
+                <option value="autonomo">Sou autônomo</option>
+                <option value="empresa">Trabalho com mais técnicos</option>
               </select>
             </div>
             <div class="form-group">
               <label>Nome</label>
-              <input type="text" id="auth-name" class="form-control" required placeholder="Nome do usuario">
+              <input type="text" id="auth-name" class="form-control" required placeholder="Nome do usuário">
             </div>
 
             <div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); border-radius:10px; padding:11px; margin-bottom:14px;">
-              <p id="auth-mode-help" style="font-size:10px; opacity:0.78; margin:0; line-height:1.5;">Como autonomo, este administrador tera acesso completo ao sistema.</p>
+              <p id="auth-mode-help" style="font-size:10px; opacity:0.78; margin:0; line-height:1.5;">Como autônomo, este administrador terá acesso completo ao sistema.</p>
             </div>
           ` : ''}
           <div class="form-group">
             <label>Login</label>
-            <input type="text" id="auth-login" class="form-control" required placeholder="usuario ou email">
+            <input type="text" id="auth-login" class="form-control" required placeholder="usuário ou email">
           </div>
           <div class="form-group">
             <label>Senha</label>
@@ -172,8 +172,8 @@ function renderAuthScreen(mode = 'login') {
     businessModeSelect.onchange = () => {
       const help = document.getElementById('auth-mode-help');
       help.textContent = businessModeSelect.value === 'empresa'
-        ? 'Como empresa, este administrador podera cadastrar tecnicos com acesso limitado.'
-        : 'Como autonomo, este administrador tera acesso completo ao sistema.';
+        ? 'Como empresa, este administrador poderá cadastrar técnicos com acesso limitado.'
+        : 'Como autônomo, este administrador terá acesso completo ao sistema.';
     };
   }
 }
@@ -292,7 +292,7 @@ async function updateMessagesBadge() {
 
 function exposeGlobalFunctions() {
   // Agenda
-  const employeeBlocked = () => alert('Acesso limitado: funcionario apenas visualiza agenda e servicos.');
+  const employeeBlocked = () => alert('Acesso limitado: funcionário apenas visualiza agenda e serviços.');
   window.renderMaintenanceForm = authService.isEmployee() ? employeeBlocked : renderMaintenanceForm;
   window.renderEquipmentHistory = renderEquipmentHistory;
   window.showNotifications = showNotifications;
@@ -337,7 +337,7 @@ function exposeGlobalFunctions() {
  */
 async function deleteItem(type, id) {
   if (authService.isEmployee()) {
-    alert('Acesso limitado: funcionario apenas visualiza agenda e servicos.');
+    alert('Acesso limitado: funcionário apenas visualiza agenda e serviços.');
     return;
   }
 

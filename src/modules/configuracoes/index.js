@@ -327,21 +327,21 @@ export function renderChangePasswordForm() {
 
 export function renderTechnicianForm() {
   if (!authService.isAdmin() || authService.getBusinessMode() !== 'empresa') {
-    alert('Apenas o administrativo de empresa pode cadastrar funcionarios.');
+    alert('Apenas o administrativo de empresa pode cadastrar funcionários.');
     return;
   }
 
-  openModal('Novo Funcionario');
+  openModal('Novo Funcionário');
 
   modalBody.innerHTML = `
     <form id="f-technician">
       <div class="form-group">
-        <label>Nome do funcionario</label>
+        <label>Nome do funcionário</label>
         <input type="text" id="t-name" class="form-control" required placeholder="Ex: Carlos Silva">
       </div>
       <div class="form-group">
         <label>Login</label>
-        <input type="text" id="t-login" class="form-control" required placeholder="usuario ou email">
+        <input type="text" id="t-login" class="form-control" required placeholder="usuário ou email">
       </div>
       <div class="form-group">
         <label>Senha</label>
@@ -349,10 +349,10 @@ export function renderTechnicianForm() {
       </div>
       <div style="background:rgba(255,255,255,0.04); border-radius:8px; padding:11px; margin-bottom:14px;">
         <p style="font-size:10px; opacity:0.72; margin:0; line-height:1.5;">
-          Este funcionario tera acesso limitado. Funcoes administrativas, backup, restauracao e limpeza de dados ficam bloqueadas.
+          Este funcionário terá acesso limitado. Funções administrativas, backup, restauração e limpeza de dados ficam bloqueadas.
         </p>
       </div>
-      <button type="submit" class="btn-primary">CADASTRAR FUNCIONARIO</button>
+      <button type="submit" class="btn-primary">CADASTRAR FUNCIONÁRIO</button>
     </form>
   `;
 
@@ -365,7 +365,7 @@ export function renderTechnicianForm() {
         password: document.getElementById('t-password').value
       });
       closeModal();
-      alert('Funcionario cadastrado com sucesso.');
+      alert('Funcionário cadastrado com sucesso.');
       location.reload();
     } catch (error) {
       alert(error.message);

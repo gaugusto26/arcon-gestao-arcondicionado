@@ -105,7 +105,7 @@ export const authService = {
   },
 
   setBusinessMode(mode) {
-    throw new Error('O modelo de trabalho nao pode ser alterado depois do cadastro.');
+    throw new Error('O modelo de trabalho não pode ser alterado depois do cadastro.');
   },
 
   register({ name, login, password, role, appName, businessMode, startSession = true }) {
@@ -119,7 +119,7 @@ export const authService = {
     }
 
     if (users.some((user) => user.login === normalizedLogin)) {
-      throw new Error('Ja existe um usuario com este login.');
+      throw new Error('Já existe um usuário com este login.');
     }
 
     const selectedRole = role === 'tecnico' ? 'tecnico' : 'administrativo';
@@ -157,7 +157,7 @@ export const authService = {
 
   createTechnician({ name, login, password }) {
     if (!this.isAdmin() || this.getBusinessMode() !== 'empresa') {
-      throw new Error('Apenas o administrativo de empresa pode cadastrar funcionarios.');
+      throw new Error('Apenas o administrativo de empresa pode cadastrar funcionários.');
     }
 
     return this.register({

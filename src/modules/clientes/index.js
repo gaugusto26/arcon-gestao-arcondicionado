@@ -192,7 +192,7 @@ export async function renderBairros(mainContent, headerContent, searchTerm = '')
               <span style="font-size:8px; font-weight:900; padding:3px 7px; border-radius:20px; background:rgba(255,255,255,0.06); color:${dueStatus.color}; border:1px solid ${dueStatus.color};">${dueStatus.label}</span>
             </div>
             <p style="margin:0; font-size:10px; opacity:0.65; font-weight:700;">${cliente.tipo || 'Cliente'} • ${group}</p>
-            <p style="margin:5px 0 0 0; font-size:10px; opacity:0.55; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${buildAddress(cliente) || 'Endereco nao informado'}</p>
+            <p style="margin:5px 0 0 0; font-size:10px; opacity:0.55; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${buildAddress(cliente) || 'Endereço não informado'}</p>
             <p style="margin:8px 0 0 0; font-size:9px; color:var(--primary); font-weight:800;">${equipamentos.length} EQUIPAMENTO(S)</p>
           </div>
           <div style="display:flex; gap:8px; align-items:center;">
@@ -294,7 +294,7 @@ export async function renderClientDetail(clienteId) {
             <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
               <div style="min-width:0;">
                 <p style="margin:0; font-size:11px; font-weight:700;">${equipamento.marca} - ${equipamento.btu} BTU</p>
-                <p style="margin:3px 0 0 0; font-size:9px; opacity:0.6;">${equipamento.localizacao || 'Local nao informado'}</p>
+                <p style="margin:3px 0 0 0; font-size:9px; opacity:0.6;">${equipamento.localizacao || 'Local não informado'}</p>
               </div>
               <button class="icon-btn" onclick="window.renderEquipmentForm(${cliente.id}, ${equipamento.id})" style="width:30px; height:30px; border:none; flex-shrink:0;">
                 <span class="material-symbols-rounded" style="font-size:15px;">edit</span>
@@ -305,25 +305,25 @@ export async function renderClientDetail(clienteId) {
       </div>
 
       <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
-        <label style="font-size:11px; font-weight:800; color:var(--primary);">HISTORICO DO CLIENTE</label>
+        <label style="font-size:11px; font-weight:800; color:var(--primary);">HISTÓRICO DO CLIENTE</label>
         <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
           ${historico.length > 0 ? historico.map((servico) => {
             const equipamento = equipamentos.find((item) => item.id === servico.equipamentoId);
             return `
               <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; border-left:3px solid #22c55e;">
                 <div style="display:flex; justify-content:space-between; gap:8px;">
-                  <p style="margin:0; font-size:11px; font-weight:800;">${servico.tipoServico || 'Servico'} ${servico.status === 'agendado' ? '(Agendado)' : ''}</p>
+                  <p style="margin:0; font-size:11px; font-weight:800;">${servico.tipoServico || 'Serviço'} ${servico.status === 'agendado' ? '(Agendado)' : ''}</p>
                   <p style="margin:0; font-size:9px; opacity:0.55;">${formatDateTime(servico.dataRealizada || servico.dataAgendada)}</p>
                 </div>
                 <p style="margin:5px 0 0 0; font-size:10px; opacity:0.75;">${servico.descricao || '-'}</p>
-                <p style="margin:5px 0 0 0; font-size:9px; opacity:0.55;">${equipamento ? `${equipamento.marca} • ${equipamento.localizacao || 'Local nao informado'}` : 'Servico do cliente'}</p>
+                <p style="margin:5px 0 0 0; font-size:9px; opacity:0.55;">${equipamento ? `${equipamento.marca} • ${equipamento.localizacao || 'Local não informado'}` : 'Serviço do cliente'}</p>
                 ${servico.valor ? `<p style="margin:5px 0 0 0; font-size:10px; color:#22c55e; font-weight:800;">R$ ${Number(servico.valor).toFixed(2)}</p>` : ''}
                 ${servico.status === 'agendado' ? `
-                  <button class="btn-primary" onclick="window.renderCloseScheduledServiceForm(${servico.id})" style="font-size:9px; padding:9px; margin-top:8px; background:#22c55e;">FECHAR SERVICO</button>
+                  <button class="btn-primary" onclick="window.renderCloseScheduledServiceForm(${servico.id})" style="font-size:9px; padding:9px; margin-top:8px; background:#22c55e;">FECHAR SERVIÇO</button>
                 ` : ''}
               </div>
             `;
-          }).join('') : '<p style="font-size:10px; opacity:0.5;">Nenhum servico registrado ainda</p>'}
+          }).join('') : '<p style="font-size:10px; opacity:0.5;">Nenhum serviço registrado ainda</p>'}
         </div>
       </div>
     </div>
@@ -341,14 +341,14 @@ export async function renderClientServiceForm(clienteId, initialStatus = 'agenda
   modalBody.innerHTML = `
     <form id="f-client-service">
       <div class="form-group">
-        <label>Lancamento</label>
+        <label>Lançamento</label>
         <select id="s-status" class="form-control">
-          <option value="agendado" ${initialStatus === 'agendado' ? 'selected' : ''}>Agendar novo servico</option>
-          <option value="concluido" ${initialStatus === 'concluido' ? 'selected' : ''}>Fechar servico realizado agora</option>
+          <option value="agendado" ${initialStatus === 'agendado' ? 'selected' : ''}>Agendar novo serviço</option>
+          <option value="concluido" ${initialStatus === 'concluido' ? 'selected' : ''}>Fechar serviço realizado agora</option>
         </select>
       </div>
       <div class="form-group">
-        <label>Tipo de Servico</label>
+        <label>Tipo de Serviço</label>
         <select id="s-tipo" class="form-control">
           ${SERVICE_TYPES.map((type) => `<option value="${type}">${type}</option>`).join('')}
         </select>
@@ -356,9 +356,9 @@ export async function renderClientServiceForm(clienteId, initialStatus = 'agenda
       <div class="form-group">
         <label>Equipamento</label>
         <select id="s-equipamento" class="form-control">
-          <option value="">Servico geral do cliente</option>
+          <option value="">Serviço geral do cliente</option>
           ${equipamentos.length > 0 ? equipamentos.map((equipamento) => `
-            <option value="${equipamento.id}" ${Number(initialEquipmentId) === equipamento.id ? 'selected' : ''}>${equipamento.marca} - ${equipamento.btu} BTU - ${equipamento.localizacao || 'Local nao informado'}</option>
+            <option value="${equipamento.id}" ${Number(initialEquipmentId) === equipamento.id ? 'selected' : ''}>${equipamento.marca} - ${equipamento.btu} BTU - ${equipamento.localizacao || 'Local não informado'}</option>
           `).join('') : ''}
         </select>
       </div>
@@ -368,7 +368,7 @@ export async function renderClientServiceForm(clienteId, initialStatus = 'agenda
         </button>
       ` : ''}
       <div class="form-group">
-        <label>Descricao</label>
+        <label>Descrição</label>
         <textarea id="s-desc" class="form-control" rows="3" placeholder="Ex: Limpeza completa da evaporadora, carga de gas, troca de capacitor..."></textarea>
       </div>
       <div style="display:flex; gap:10px;">
@@ -401,14 +401,14 @@ export async function renderClientServiceForm(clienteId, initialStatus = 'agenda
         </div>
       `}
       <div class="form-group" id="s-proxima-wrap" style="display:none;">
-        <label>Proxima manutencao do equipamento</label>
+        <label>Próxima manutenção do equipamento</label>
         <input type="datetime-local" id="s-proxima" class="form-control">
       </div>
       ${isAdminEmpresa ? `
       <div class="form-group">
-        <label>Tecnico responsavel</label>
+        <label>Técnico responsável</label>
         <select id="s-tecnico" class="form-control" required>
-          <option value="" disabled selected>Selecionar tecnico...</option>
+          <option value="" disabled selected>Selecionar técnico...</option>
           ${tecnicos.map((t) => `<option value="${t.id}">${t.name}</option>`).join('')}
         </select>
       </div>
@@ -492,12 +492,12 @@ export async function renderCloseScheduledServiceForm(servicoId) {
   const isAdminEmpresa = authService.isAdmin() && authService.getBusinessMode() === 'empresa';
   const tecnicos = isAdminEmpresa ? authService.getUsers().filter((u) => u.role === 'tecnico') : [];
 
-  openModal(`Fechar - ${cliente?.nome || 'Servico'}`);
+  openModal(`Fechar - ${cliente?.nome || 'Serviço'}`);
 
   modalBody.innerHTML = `
     <form id="f-close-service">
       <div class="form-group">
-        <label>Tipo de Servico</label>
+        <label>Tipo de Serviço</label>
         <input type="text" class="form-control" value="${servico.tipoServico || ''}" disabled>
       </div>
       <div class="form-group">
@@ -505,7 +505,7 @@ export async function renderCloseScheduledServiceForm(servicoId) {
         <select id="cs-equipamento" class="form-control" required>
           <option value="">Selecionar equipamento...</option>
           ${equipamentos.map((equipamento) => `
-            <option value="${equipamento.id}" ${servico.equipamentoId === equipamento.id ? 'selected' : ''}>${equipamento.marca} - ${equipamento.btu} BTU - ${equipamento.localizacao || 'Local nao informado'}</option>
+            <option value="${equipamento.id}" ${servico.equipamentoId === equipamento.id ? 'selected' : ''}>${equipamento.marca} - ${equipamento.btu} BTU - ${equipamento.localizacao || 'Local não informado'}</option>
           `).join('')}
         </select>
       </div>
@@ -514,7 +514,7 @@ export async function renderCloseScheduledServiceForm(servicoId) {
         <input type="datetime-local" id="cs-realizada" class="form-control" value="${toDateTimeInputValue()}" required>
       </div>
       <div class="form-group">
-        <label>Proxima manutencao desse equipamento</label>
+        <label>Próxima manutenção desse equipamento</label>
         <input type="datetime-local" id="cs-proxima" class="form-control" required>
       </div>
       <div style="display:flex; gap:10px;">
@@ -530,19 +530,19 @@ export async function renderCloseScheduledServiceForm(servicoId) {
         </div>
       </div>
       <div class="form-group">
-        <label>Descricao final</label>
+        <label>Descrição final</label>
         <textarea id="cs-desc" class="form-control" rows="3">${servico.descricao || ''}</textarea>
       </div>
       ${isAdminEmpresa ? `
       <div class="form-group">
-        <label>Tecnico responsavel</label>
+        <label>Técnico responsável</label>
         <select id="cs-tecnico" class="form-control">
-          <option value="">Sem atribuicao</option>
+          <option value="">Sem atribuição</option>
           ${tecnicos.map((t) => `<option value="${t.id}" ${servico.tecnicoId === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
         </select>
       </div>
       ` : ''}
-      <button type="submit" class="btn-primary">FECHAR SERVICO</button>
+      <button type="submit" class="btn-primary">FECHAR SERVIÇO</button>
     </form>
   `;
 
@@ -602,11 +602,11 @@ export async function renderEquipmentForm(clienteId, equipamentoId = null) {
         </div>
         <div class="form-group" style="flex:1;">
           <label>Local do AC</label>
-          <input type="text" id="e-local" class="form-control" value="${equipamento?.localizacao || ''}" placeholder="Sala, quarto, recepcao">
+          <input type="text" id="e-local" class="form-control" value="${equipamento?.localizacao || ''}" placeholder="Sala, quarto, recepção">
         </div>
       </div>
       <div class="form-group">
-        <label>Proxima manutencao</label>
+        <label>Próxima manutenção</label>
         <input type="datetime-local" id="e-proxima" class="form-control" value="${equipamento?.proximaManutencao ? toDateTimeInputValue(equipamento.proximaManutencao) : ''}">
       </div>
       <button type="submit" class="btn-primary">${isEditing ? 'SALVAR EQUIPAMENTO' : 'ADICIONAR EQUIPAMENTO'}</button>
@@ -753,7 +753,7 @@ export async function renderFullPropertyForm(clienteId = null, scheduledServiceD
           </div>
           <div class="form-group" style="flex:1;">
             <label>Local do AC</label>
-            <input type="text" id="c-local" class="form-control" placeholder="Sala, quarto, recepcao">
+            <input type="text" id="c-local" class="form-control" placeholder="Sala, quarto, recepção">
           </div>
         </div>
       `}

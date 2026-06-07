@@ -86,7 +86,7 @@ function getAgendaEvents(equipamentos, clientes, scheduledServices) {
         type: 'maintenance',
         date: equipamento.proximaManutencao,
         title: cliente?.nome || 'Cliente',
-        subtitle: `${equipamento.marca} - ${equipamento.localizacao || 'Local nao informado'}`,
+        subtitle: `${equipamento.marca} - ${equipamento.localizacao || 'Local não informado'}`,
         color: daysUntilDate(equipamento.proximaManutencao) <= 0 ? '#ff4d4d' : '#22c55e',
         action: `window.renderEquipmentHistory(${equipamento.id})`
       };
@@ -280,16 +280,16 @@ export async function renderDashboard(mainContent, headerContent, searchTerm = '
       <div class="card" style="grid-column: span 2; margin-left:0; margin-right:0; border-left:5px solid #0ea5e9;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
           <div style="min-width:0;">
-            <p style="font-size:8px; font-weight:900; color:#0ea5e9; margin:0 0 6px 0;">SERVICO AGENDADO</p>
+            <p style="font-size:8px; font-weight:900; color:#0ea5e9; margin:0 0 6px 0;">SERVIÇO AGENDADO</p>
             <h3 style="font-size:14px; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${displayName}</h3>
-            <p style="font-size:10px; opacity:0.65; margin:5px 0 0 0;">${service.tipoServico || 'Servico'} • ${e ? `${e.marca} - ${e.localizacao || 'Local nao informado'}` : 'Equipamento a definir'}</p>
-            ${tecnico ? `<p style="font-size:9px; margin:5px 0 0 0; color:#a78bfa; font-weight:700;">TECNICO: ${tecnico.name}</p>` : (isEmpresa ? `<p style="font-size:9px; margin:5px 0 0 0; opacity:0.4;">Sem tecnico atribuido</p>` : '')}
+            <p style="font-size:10px; opacity:0.65; margin:5px 0 0 0;">${service.tipoServico || 'Serviço'} • ${e ? `${e.marca} - ${e.localizacao || 'Local não informado'}` : 'Equipamento a definir'}</p>
+            ${tecnico ? `<p style="font-size:9px; margin:5px 0 0 0; color:#a78bfa; font-weight:700;">TÉCNICO: ${tecnico.name}</p>` : (isEmpresa ? `<p style="font-size:9px; margin:5px 0 0 0; opacity:0.4;">Sem técnico atribuído</p>` : '')}
           </div>
           <span style="font-size:10px; font-weight:900; color:#0ea5e9;">${formatDateTime(service.dataAgendada)}</span>
         </div>
         ${canManage ? `<div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:15px;">
           <button class="btn-primary" onclick="window.renderCloseScheduledServiceForm(${service.id})" style="margin-top:0; background:#ef4444; color:white; font-size:9px; padding:10px 6px;">FECHAR</button>
-          ${c ? `<button class="btn-primary" onclick="window.renderNewServiceLaunch(${c.id}, ${e?.id || 'null'})" style="margin-top:0; background:#7c3aed; font-size:9px; padding:10px 6px;">NOVO SERVICO</button>` : ''}
+          ${c ? `<button class="btn-primary" onclick="window.renderNewServiceLaunch(${c.id}, ${e?.id || 'null'})" style="margin-top:0; background:#7c3aed; font-size:9px; padding:10px 6px;">NOVO SERVIÇO</button>` : ''}
         </div>` : ''}
         <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:8px;">
           ${addressLink ? `<a class="btn-primary" href="${addressLink}" target="_blank" style="margin-top:0; background:#0ea5e9; font-size:9px; padding:10px 6px; text-decoration:none;">MAPS</a>` : `<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">MAPS</button>`}
@@ -348,7 +348,7 @@ export async function renderDashboard(mainContent, headerContent, searchTerm = '
           <button class="btn-primary" onclick="window.renderClientServiceForm(${c.id}, 'concluido', ${e.id})" 
                   style="margin-top:0; background:#ef4444; color:white; font-size:9px; padding:10px 6px;">FECHAR</button>
           <button class="btn-primary" onclick="window.renderNewServiceLaunch(${c.id}, ${e.id})" 
-                  style="margin-top:0; background:#7c3aed; font-size:9px; padding:10px 6px;">NOVO SERVICO</button>
+                  style="margin-top:0; background:#7c3aed; font-size:9px; padding:10px 6px;">NOVO SERVIÇO</button>
         </div>` : ''}
         <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:8px;">
           ${addressLink ? `<a class="btn-primary" href="${addressLink}" target="_blank" style="margin-top:0; background:#0ea5e9; font-size:9px; padding:10px 6px; text-decoration:none;">MAPS</a>` : `<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">MAPS</button>`}
@@ -410,9 +410,9 @@ export async function showNotifications() {
     html += `
       <div ${canManage ? `onclick="window.renderCloseScheduledServiceForm(${service.id})"` : ''} style="background:rgba(255,255,255,0.05); padding:10px; border-left:3px solid ${color}; border-radius:8px; cursor:${canManage ? 'pointer' : 'default'};">
         <p style="margin:0; font-size:12px; font-weight:bold;">${c?.nome || 'Cliente'}</p>
-        <p style="margin:2px 0 0 0; font-size:10px; opacity:0.7;">${service.tipoServico || 'Servico'} • ${e ? `${e.marca} - ${e.localizacao || 'Local nao informado'}` : 'Equipamento a definir'}</p>
+        <p style="margin:2px 0 0 0; font-size:10px; opacity:0.7;">${service.tipoServico || 'Serviço'} • ${e ? `${e.marca} - ${e.localizacao || 'Local não informado'}` : 'Equipamento a definir'}</p>
         <p style="margin:5px 0 0 0; font-size:10px; color:${color}; font-weight:bold;">${txt} • ${formatDateTime(service.dataAgendada)}</p>
-        ${tecnico ? `<p style="margin:4px 0 0 0; font-size:9px; color:#a78bfa; font-weight:700;">TECNICO: ${tecnico.name}</p>` : ''}
+        ${tecnico ? `<p style="margin:4px 0 0 0; font-size:9px; color:#a78bfa; font-weight:700;">TÉCNICO: ${tecnico.name}</p>` : ''}
       </div>
     `;
   }
@@ -463,7 +463,7 @@ export function changeCalendarMonth(direction) {
 }
 
 export function renderNewServicePrompt(clienteId, equipamentoId) {
-  const shouldCloseCurrent = confirm('Deseja fechar o servico atual antes de agendar um novo servico?');
+  const shouldCloseCurrent = confirm('Deseja fechar o serviço atual antes de agendar um novo serviço?');
   if (shouldCloseCurrent) {
     window.renderClientServiceForm(clienteId, 'concluido', equipamentoId);
     return;
@@ -478,7 +478,7 @@ export function renderNewServiceLaunch(clienteId, equipamentoId = null) {
 
 export async function renderCalendarServicePicker(dateIso) {
   if (!authService.isAdmin()) {
-    alert('Acesso limitado: funcionario apenas visualiza agenda e servicos.');
+    alert('Acesso limitado: funcionário apenas visualiza agenda e serviços.');
     return;
   }
 
@@ -493,7 +493,7 @@ export async function renderCalendarServicePicker(dateIso) {
     : `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
   const selectedLabel = selectedDate.toLocaleDateString('pt-BR');
 
-  openModal('Agendar Servico');
+  openModal('Agendar Serviço');
   modalBody.innerHTML = `
     <form id="f-calendar-service">
       <div style="background:rgba(255,255,255,0.04); border-radius:8px; padding:12px; margin-bottom:12px;">
@@ -514,7 +514,7 @@ export async function renderCalendarServicePicker(dateIso) {
       <div class="form-group">
         <label>Equipamento</label>
         <select id="cal-equipamento" class="form-control">
-          <option value="">Servico geral do cliente</option>
+          <option value="">Serviço geral do cliente</option>
         </select>
       </div>
       <button type="submit" class="btn-primary">CONTINUAR</button>
@@ -537,15 +537,15 @@ export async function renderCalendarServicePicker(dateIso) {
       <option value="">Selecionar cliente...</option>
       ${filteredClients.map((cliente) => `<option value="${cliente.id}">${cliente.nome}</option>`).join('')}
     `;
-    equipmentSelect.innerHTML = '<option value="">Servico geral do cliente</option>';
+    equipmentSelect.innerHTML = '<option value="">Serviço geral do cliente</option>';
   };
 
   clientSelect.onchange = () => {
     const clientId = Number(clientSelect.value);
     const clientEquipments = equipamentos.filter((equipamento) => equipamento.clienteId === clientId);
     equipmentSelect.innerHTML = `
-      <option value="">Servico geral do cliente</option>
-      ${clientEquipments.map((equipamento) => `<option value="${equipamento.id}">${equipamento.marca} - ${equipamento.btu} BTU - ${equipamento.localizacao || 'Local nao informado'}</option>`).join('')}
+      <option value="">Serviço geral do cliente</option>
+      ${clientEquipments.map((equipamento) => `<option value="${equipamento.id}">${equipamento.marca} - ${equipamento.btu} BTU - ${equipamento.localizacao || 'Local não informado'}</option>`).join('')}
     `;
   };
   searchInput.oninput = (event) => renderClientOptions(event.target.value);
@@ -629,7 +629,7 @@ ${defaultType ? defaultType + ': ' : ''}        </textarea>
       equipamentoId: fId,
       clientId: eqs.find((equipamento) => equipamento.id === fId)?.clienteId || null,
       dataRealizada: new Date(),
-      tipoServico: defaultType || 'Servico',
+      tipoServico: defaultType || 'Serviço',
       descricao: document.getElementById('m-d').value,
       proximaData: nxD,
       valor: Number(document.getElementById('m-v').value),
