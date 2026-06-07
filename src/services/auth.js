@@ -1,250 +1,190 @@
-import { generateId } from './db.js';
+import { supabase } from '../lib/supabase.js';
+import { setOwnerId } from './db.js';
 
-const DEFAULTS = {
-  name: 'Tecnico',
-  appName: 'Arcon',
-  avatar: null,
-  role: 'tecnico'
-};
+// ──────────────────────────────────────────────
+// Cache da sessão (sync, atualizado pelo listener)
+// ──────────────────────────────────────────────
 
-const USERS_KEY = 'jampa_users';
-const SESSION_KEY = 'jampa_session_user';
-const APP_NAME_KEY = 'jampa_app_name';
-const BUSINESS_MODE_KEY = 'jampa_business_mode';
+let _session = null;
+let _currentUser = null;
 
-function normalizeLogin(login) {
-  return String(login || '').trim().toLowerCase();
+async function loadProfile(user) {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  _currentUser = {
+    id:           user.id,
+    email:        user.email,
+    login:        user.email,
+    name:         profile?.name || user.user_metadata?.name || 'Usuário',
+    role:         profile?.role || 'administrativo',
+    businessMode: profile?.business_mode || 'autonomo',
+    avatar:       profile?.avatar || null,
+    createdAt:    user.created_at
+  };
 }
 
-function getUsers() {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-function getSessionLogin() {
-  return localStorage.getItem(SESSION_KEY);
-}
-
-function publicUser(user) {
-  if (!user) return null;
-  const { password, ...safeUser } = user;
-  return safeUser;
-}
-
-function ensureUser(users, user) {
-  if (users.some((item) => item.login === user.login)) return false;
-  users.push({
-    id: generateId(),
-    avatar: DEFAULTS.avatar,
-    createdAt: new Date().toISOString(),
-    ...user
-  });
-  return true;
-}
+// ──────────────────────────────────────────────
+// authService
+// ──────────────────────────────────────────────
 
 export const authService = {
-  ensureTestUsers() {
-    const users = getUsers();
-    const changed = [
-      ensureUser(users, {
-        name: 'Admin Autonomo',
-        login: 'adminaut',
-        password: 'adminaut',
-        role: 'administrativo',
-        businessMode: 'autonomo'
-      }),
-      ensureUser(users, {
-        name: 'Admin Empresa',
-        login: 'adminemp',
-        password: 'adminemp',
-        role: 'administrativo',
-        businessMode: 'empresa'
-      })
-    ].some(Boolean);
+  async init() {
+    const { data: { session } } = await supabase.auth.getSession();
+    _session = session;
+    setOwnerId(session?.user?.id);
+    if (session?.user) await loadProfile(session.user);
 
-    if (changed) saveUsers(users);
-    if (!localStorage.getItem(APP_NAME_KEY)) localStorage.setItem(APP_NAME_KEY, DEFAULTS.appName);
-  },
-
-  hasUsers() {
-    return getUsers().length > 0;
-  },
-
-  getUsers() {
-    return getUsers().map(publicUser);
-  },
-
-  getCurrentUser() {
-    const sessionLogin = getSessionLogin();
-    if (!sessionLogin) return null;
-    return publicUser(getUsers().find((user) => user.login === sessionLogin));
-  },
-
-  isAuthenticated() {
-    return Boolean(this.getCurrentUser());
-  },
-
-  isAdmin() {
-    return this.getCurrentUser()?.role === 'administrativo';
-  },
-
-  isEmployee() {
-    return this.getCurrentUser()?.role === 'tecnico';
-  },
-
-  getBusinessMode() {
-    const currentUser = this.getCurrentUser();
-    return currentUser?.businessMode || localStorage.getItem(BUSINESS_MODE_KEY) || 'autonomo';
-  },
-
-  setBusinessMode(mode) {
-    throw new Error('O modelo de trabalho não pode ser alterado depois do cadastro.');
-  },
-
-  register({ name, login, password, role, appName, businessMode, startSession = true }) {
-    const normalizedLogin = normalizeLogin(login);
-    const cleanName = String(name || '').trim();
-    const cleanPassword = String(password || '').trim();
-    const users = getUsers();
-
-    if (!cleanName || !normalizedLogin || !cleanPassword) {
-      throw new Error('Preencha nome, login e senha.');
-    }
-
-    if (users.some((user) => user.login === normalizedLogin)) {
-      throw new Error('Já existe um usuário com este login.');
-    }
-
-    const selectedRole = role === 'tecnico' ? 'tecnico' : 'administrativo';
-    const user = {
-      id: generateId(),
-      name: cleanName,
-      login: normalizedLogin,
-      password: cleanPassword,
-      role: selectedRole,
-      businessMode: selectedRole === 'administrativo'
-        ? (businessMode === 'empresa' ? 'empresa' : 'autonomo')
-        : null,
-      avatar: DEFAULTS.avatar,
-      createdAt: new Date().toISOString()
-    };
-
-    users.push(user);
-    saveUsers(users);
-
-    if (selectedRole === 'administrativo') {
-      localStorage.setItem(BUSINESS_MODE_KEY, businessMode === 'empresa' ? 'empresa' : 'autonomo');
-    }
-
-    if (appName && selectedRole === 'administrativo') {
-      localStorage.setItem(APP_NAME_KEY, String(appName).trim());
-    } else if (!localStorage.getItem(APP_NAME_KEY)) {
-      localStorage.setItem(APP_NAME_KEY, DEFAULTS.appName);
-    }
-
-    if (startSession) {
-      localStorage.setItem(SESSION_KEY, normalizedLogin);
-    }
-    return publicUser(user);
-  },
-
-  createTechnician({ name, login, password }) {
-    if (!this.isAdmin() || this.getBusinessMode() !== 'empresa') {
-      throw new Error('Apenas o administrativo de empresa pode cadastrar funcionários.');
-    }
-
-    return this.register({
-      name,
-      login,
-      password,
-      role: 'tecnico',
-      startSession: false
+    supabase.auth.onAuthStateChange(async (_event, session) => {
+      _session = session;
+      setOwnerId(session?.user?.id);
+      if (session?.user) {
+        await loadProfile(session.user);
+      } else {
+        _currentUser = null;
+      }
     });
   },
 
-  login(login, password) {
-    const normalizedLogin = normalizeLogin(login);
-    const cleanPassword = String(password || '').trim();
-    const user = getUsers().find((item) => item.login === normalizedLogin && item.password === cleanPassword);
-
-    if (!user) {
-      throw new Error('Login ou senha invalido.');
-    }
-
-    localStorage.setItem(SESSION_KEY, user.login);
-    return publicUser(user);
+  isAuthenticated() {
+    return Boolean(_session && _currentUser);
   },
 
-  logout() {
-    localStorage.removeItem(SESSION_KEY);
+  getCurrentUser() {
+    return _currentUser;
+  },
+
+  isAdmin() {
+    return _currentUser?.role === 'administrativo';
+  },
+
+  isEmployee() {
+    return _currentUser?.role === 'tecnico';
+  },
+
+  getBusinessMode() {
+    return _currentUser?.businessMode || 'autonomo';
+  },
+
+  hasUsers() {
+    return true;
+  },
+
+  getUsers() {
+    return _currentUser ? [_currentUser] : [];
+  },
+
+  async register({ name, email, password, businessMode }) {
+    const cleanName  = String(name || '').trim();
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const cleanPass  = String(password || '').trim();
+
+    if (!cleanName || !cleanEmail || !cleanPass) {
+      throw new Error('Preencha nome, e-mail e senha.');
+    }
+    if (cleanPass.length < 6) {
+      throw new Error('A senha deve ter ao menos 6 caracteres.');
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email: cleanEmail,
+      password: cleanPass,
+      options: {
+        data: {
+          name: cleanName,
+          role: 'administrativo',
+          businessMode: businessMode || 'autonomo'
+        }
+      }
+    });
+
+    if (error) throw new Error(error.message);
+
+    _session = data.session;
+    setOwnerId(data.session?.user?.id);
+    if (data.user) await loadProfile(data.user);
+    return _currentUser;
+  },
+
+  async login(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: String(email || '').trim().toLowerCase(),
+      password: String(password || '').trim()
+    });
+
+    if (error) throw new Error('E-mail ou senha inválidos.');
+
+    _session = data.session;
+    setOwnerId(data.session?.user?.id);
+    if (data.user) await loadProfile(data.user);
+    return _currentUser;
+  },
+
+  async logout() {
+    await supabase.auth.signOut();
+    _session = null;
+    _currentUser = null;
   },
 
   getTechnicianData() {
-    const currentUser = this.getCurrentUser();
     return {
-      name: currentUser?.name || localStorage.getItem('jampa_tech_name') || DEFAULTS.name,
-      appName: localStorage.getItem(APP_NAME_KEY) || DEFAULTS.appName,
-      avatar: currentUser?.avatar || localStorage.getItem('jampa_tech_avatar') || DEFAULTS.avatar,
-      role: currentUser?.role || DEFAULTS.role,
-      login: currentUser?.login || ''
+      name:    _currentUser?.name    || 'Usuário',
+      appName: 'Arcon',
+      avatar:  _currentUser?.avatar  || null,
+      role:    _currentUser?.role    || 'administrativo',
+      login:   _currentUser?.email   || ''
     };
   },
 
-  setTechnicianData(name, appName, avatar) {
-    const currentUser = this.getCurrentUser();
-    if (appName !== null && appName !== undefined) localStorage.setItem(APP_NAME_KEY, appName);
+  async setTechnicianData(name, _appName, avatar) {
+    if (!_currentUser) return;
+    const updates = {};
+    if (name  !== null && name  !== undefined) updates.name   = String(name).trim();
+    if (avatar !== null && avatar !== undefined) updates.avatar = avatar;
+    if (!Object.keys(updates).length) return;
 
-    if (!currentUser) {
-      if (name !== null && name !== undefined) localStorage.setItem('jampa_tech_name', name);
-      if (avatar !== null && avatar !== undefined) localStorage.setItem('jampa_tech_avatar', avatar);
-      return;
-    }
-
-    const users = getUsers();
-    const index = users.findIndex((user) => user.login === currentUser.login);
-    if (index === -1) return;
-
-    if (name !== null && name !== undefined) users[index].name = name;
-    if (avatar !== null && avatar !== undefined) users[index].avatar = avatar;
-    saveUsers(users);
+    await supabase.from('profiles').update(updates).eq('id', _currentUser.id);
+    Object.assign(_currentUser, updates);
   },
 
-  changePassword(currentPassword, newPassword) {
-    const sessionLogin = getSessionLogin();
-    const users = getUsers();
-    const index = users.findIndex((u) => u.login === sessionLogin);
-    if (index === -1) throw new Error('Usuário não encontrado.');
-    if (users[index].password !== String(currentPassword).trim()) throw new Error('Senha atual incorreta.');
+  async changePassword(currentPassword, newPassword) {
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email:    _currentUser.email,
+      password: String(currentPassword).trim()
+    });
+    if (verifyError) throw new Error('Senha atual incorreta.');
+
     const clean = String(newPassword).trim();
-    if (clean.length < 4) throw new Error('A nova senha deve ter ao menos 4 caracteres.');
-    users[index].password = clean;
-    saveUsers(users);
+    if (clean.length < 6) throw new Error('A nova senha deve ter ao menos 6 caracteres.');
+
+    const { error } = await supabase.auth.updateUser({ password: clean });
+    if (error) throw new Error(error.message);
   },
 
-  updateProfile(name, newLogin) {
-    const sessionLogin = getSessionLogin();
-    const users = getUsers();
-    const index = users.findIndex((u) => u.login === sessionLogin);
-    if (index === -1) throw new Error('Usuário não encontrado.');
-    const cleanName = String(name || '').trim();
-    if (!cleanName) throw new Error('Nome não pode ser vazio.');
-    if (newLogin) {
-      const normalized = normalizeLogin(newLogin);
-      if (normalized !== sessionLogin && users.some((u) => u.login === normalized)) {
-        throw new Error('Este login já está em uso.');
-      }
-      users[index].login = normalized;
-      localStorage.setItem(SESSION_KEY, normalized);
+  async updateProfile(name, newEmail) {
+    if (name) {
+      const cleanName = String(name).trim();
+      if (!cleanName) throw new Error('Nome não pode ser vazio.');
+      await supabase.from('profiles').update({ name: cleanName }).eq('id', _currentUser.id);
+      _currentUser.name = cleanName;
     }
-    users[index].name = cleanName;
-    saveUsers(users);
+    if (newEmail && newEmail !== _currentUser.email) {
+      const { error } = await supabase.auth.updateUser({ email: String(newEmail).trim().toLowerCase() });
+      if (error) throw new Error(error.message);
+      _currentUser.email = newEmail;
+      _currentUser.login = newEmail;
+    }
+  },
+
+  createTechnician() {
+    throw new Error('Modo empresa estará disponível em breve.');
+  },
+
+  setBusinessMode() {
+    throw new Error('O modelo de trabalho não pode ser alterado depois do cadastro.');
   },
 
   getNotificationsEnabled() {

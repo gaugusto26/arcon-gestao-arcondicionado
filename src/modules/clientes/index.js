@@ -660,11 +660,15 @@ export async function renderBairroForm() {
 
   document.getElementById('f-bairro').onsubmit = async (event) => {
     event.preventDefault();
-    await db.bairros.add({
-      nome: document.getElementById('b-nome').value,
-      cor: document.getElementById('b-cor').value
-    });
-    location.reload();
+    try {
+      await db.bairros.add({
+        nome: document.getElementById('b-nome').value,
+        cor: document.getElementById('b-cor').value
+      });
+      location.reload();
+    } catch (err) {
+      alert('Erro ao salvar grupo: ' + err.message);
+    }
   };
 }
 
@@ -764,7 +768,7 @@ export async function renderFullPropertyForm(clienteId = null, scheduledServiceD
 
   document.getElementById('f-client').onsubmit = async (event) => {
     event.preventDefault();
-
+    try {
     const addressPayload = {
       logradouro: document.getElementById('c-logradouro').value,
       numero: document.getElementById('c-numero').value,
@@ -815,6 +819,9 @@ export async function renderFullPropertyForm(clienteId = null, scheduledServiceD
     }
 
     location.reload();
+    } catch (err) {
+      alert('Erro ao salvar cliente: ' + err.message);
+    }
   };
 }
 

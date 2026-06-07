@@ -37,6 +37,7 @@ async function init() {
     // Inicializar UI
     initializeUIElements();
     exposeAuthFunctions();
+    await authService.init();
     if (!authService.isAuthenticated()) {
       renderAuthScreen();
       hideSplash();
@@ -106,7 +107,7 @@ function renderAuthScreen(mode = 'login') {
         <form id="auth-form">
           ${isCadastro ? `
             <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:12px; margin:18px 0;">
-              <p style="font-size:11px; opacity:0.72; margin:0; line-height:1.5;">Cadastro exclusivo para administradores. Técnicos são cadastrados apenas dentro do painel administrativo da empresa.</p>
+              <p style="font-size:11px; opacity:0.72; margin:0; line-height:1.5;">Cadastro exclusivo para administradores. Use seu e-mail para criar a conta.</p>
             </div>
             <div class="form-group">
               <label>Modelo de trabalho</label>
@@ -125,8 +126,8 @@ function renderAuthScreen(mode = 'login') {
             </div>
           ` : ''}
           <div class="form-group">
-            <label>Login</label>
-            <input type="text" id="auth-login" class="form-control" required placeholder="usuário ou email">
+            <label>E-mail</label>
+            <input type="email" id="auth-login" class="form-control" required placeholder="seu@email.com">
           </div>
           <div class="form-group">
             <label>Senha</label>
@@ -145,15 +146,14 @@ function renderAuthScreen(mode = 'login') {
     event.preventDefault();
     try {
       if (isCadastro) {
-        authService.register({
-          name: document.getElementById('auth-name').value,
-          login: document.getElementById('auth-login').value,
-          password: document.getElementById('auth-password').value,
-          appName: 'Arcon',
+        await authService.register({
+          name:         document.getElementById('auth-name').value,
+          email:        document.getElementById('auth-login').value,
+          password:     document.getElementById('auth-password').value,
           businessMode: document.getElementById('auth-business-mode')?.value
         });
       } else {
-        authService.login(
+        await authService.login(
           document.getElementById('auth-login').value,
           document.getElementById('auth-password').value
         );
@@ -189,9 +189,10 @@ async function bootAuthenticatedApp() {
 
 function exposeAuthFunctions() {
   window.renderAuthScreen = renderAuthScreen;
-  window.logoutApp = () => {
-    authService.logout();
+  window.logoutApp = async () => {
+    await authService.logout();
     closeModal();
+    setAppVisible(false);
     renderAuthScreen('login');
   };
 }

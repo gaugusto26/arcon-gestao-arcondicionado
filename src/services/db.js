@@ -1,42 +1,235 @@
-import Dexie from 'dexie';
+import { supabase } from '../lib/supabase.js';
 
-export const db = new Dexie('MaintenanceDB');
-let _syncWriteFlag = false;
+// ──────────────────────────────────────────────
+// Conversão camelCase ↔ snake_case
+// ──────────────────────────────────────────────
 
-export function setSyncWriteFlag(value) {
-  _syncWriteFlag = Boolean(value);
+function toSnake(str) {
+  return str.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
+
+function toCamel(str) {
+  return str.replace(/_([a-z])/g, (_, l) => l.toUpperCase());
+}
+
+function rowToCamel(row) {
+  if (!row) return null;
+  const out = {};
+  for (const [k, v] of Object.entries(row)) {
+    if (k === 'owner_id') continue;
+    out[toCamel(k)] = v;
+  }
+  return out;
+}
+
+function rowToSnake(obj) {
+  if (!obj) return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[toSnake(k)] = v;
+  }
+  return out;
+}
+
+// ──────────────────────────────────────────────
+// Owner ID — fallback sempre confiável
+// ──────────────────────────────────────────────
+
+let _ownerId = null;
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  _ownerId = session?.user?.id ?? null;
+});
+
+export function setOwnerId(id) {
+  _ownerId = id ?? null;
+}
+
+async function getOwnerId() {
+  if (_ownerId) return _ownerId;
+  const { data: { session } } = await supabase.auth.getSession();
+  _ownerId = session?.user?.id ?? null;
+  return _ownerId;
+}
+
+// ──────────────────────────────────────────────
+// Factory de tabela — API compatível com Dexie
+// ──────────────────────────────────────────────
+
+function makeTable(tableName) {
+  const q = () => supabase.from(tableName);
+
+  return {
+    async toArray() {
+      const uid = await getOwnerId();
+      const { data, error } = await q().select('*').eq('owner_id', uid);
+      if (error) throw error;
+      return data.map(rowToCamel);
+    },
+
+    async get(id) {
+      const uid = await getOwnerId();
+      const { data, error } = await q().select('*').eq('owner_id', uid).eq('id', id).maybeSingle();
+      if (error) throw error;
+      return rowToCamel(data);
+    },
+
+    async add(item) {
+      const uid = await getOwnerId();
+      const { id: _strip, ...rest } = item;
+      const payload = { ...rowToSnake(rest), owner_id: uid };
+      const { data, error } = await q().insert(payload).select('id').single();
+      if (error) throw error;
+      return data.id;
+    },
+
+    async update(id, changes) {
+      const uid = await getOwnerId();
+      const { id: _sid, owner_id: _own, ...rest } = changes;
+      const { error } = await q().update(rowToSnake(rest)).eq('owner_id', uid).eq('id', id);
+      if (error) throw error;
+    },
+
+    async delete(id) {
+      const uid = await getOwnerId();
+      const { error } = await q().delete().eq('owner_id', uid).eq('id', id);
+      if (error) throw error;
+    },
+
+    async count() {
+      const uid = await getOwnerId();
+      const { count, error } = await q().select('*', { count: 'exact', head: true }).eq('owner_id', uid);
+      if (error) throw error;
+      return count ?? 0;
+    },
+
+    async bulkAdd(items) {
+      if (!items?.length) return;
+      const uid = await getOwnerId();
+      const payload = items.map(({ id: _strip, ...rest }) => ({
+        ...rowToSnake(rest),
+        owner_id: uid
+      }));
+      const { error } = await q().insert(payload);
+      if (error) throw error;
+    },
+
+    async clear() {
+      const uid = await getOwnerId();
+      const { error } = await q().delete().eq('owner_id', uid);
+      if (error) throw error;
+    },
+
+    async put(item) {
+      const uid = await getOwnerId();
+      const payload = { ...rowToSnake(item), owner_id: uid };
+      const { error } = await q().upsert(payload);
+      if (error) throw error;
+    },
+
+    filter(fn) {
+      return {
+        async first() {
+          const uid = await getOwnerId();
+          const { data, error } = await q().select('*').eq('owner_id', uid);
+          if (error) throw error;
+          return data.map(rowToCamel).find(fn) ?? null;
+        },
+        async toArray() {
+          const uid = await getOwnerId();
+          const { data, error } = await q().select('*').eq('owner_id', uid);
+          if (error) throw error;
+          return data.map(rowToCamel).filter(fn);
+        }
+      };
+    },
+
+    where(field) {
+      const col = toSnake(field);
+      return {
+        equals(value) {
+          return {
+            async toArray() {
+              const uid = await getOwnerId();
+              const { data, error } = await q().select('*').eq('owner_id', uid).eq(col, value);
+              if (error) throw error;
+              return data.map(rowToCamel);
+            },
+            async delete() {
+              const uid = await getOwnerId();
+              const { error } = await q().delete().eq('owner_id', uid).eq(col, value);
+              if (error) throw error;
+            },
+            async first() {
+              const uid = await getOwnerId();
+              const { data, error } = await q().select('*').eq('owner_id', uid).eq(col, value).limit(1).maybeSingle();
+              if (error) throw error;
+              return rowToCamel(data);
+            }
+          };
+        },
+        above(value) {
+          return {
+            async toArray() {
+              const uid = await getOwnerId();
+              const { data, error } = await q().select('*').eq('owner_id', uid).gt(col, value);
+              if (error) throw error;
+              return data.map(rowToCamel);
+            }
+          };
+        },
+        anyOf(values) {
+          return {
+            async toArray() {
+              const uid = await getOwnerId();
+              const { data, error } = await q().select('*').eq('owner_id', uid).in(col, values);
+              if (error) throw error;
+              return data.map(rowToCamel);
+            },
+            async modify(changes) {
+              const uid = await getOwnerId();
+              const { id: _s, owner_id: _o, ...rest } = changes;
+              const { error } = await q().update(rowToSnake(rest)).eq('owner_id', uid).in(col, values);
+              if (error) throw error;
+            }
+          };
+        }
+      };
+    }
+  };
+}
+
+// ──────────────────────────────────────────────
+// Instâncias de tabela
+// ──────────────────────────────────────────────
+
+export const db = {
+  bairros:         makeTable('bairros'),
+  clientes:        makeTable('clientes'),
+  unidades:        makeTable('unidades'),
+  equipamentos:    makeTable('equipamentos'),
+  manutencoes:     makeTable('manutencoes'),
+  materiais:       makeTable('materiais'),
+  materiaisUsados: makeTable('materiais_usados'),
+  orcamentos:      makeTable('orcamentos'),
+  comunicacao:     makeTable('comunicacao'),
+  analytics:       makeTable('analytics'),
+};
+
+// ──────────────────────────────────────────────
+// Utilitários
+// ──────────────────────────────────────────────
 
 export function generateId() {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return crypto.randomUUID();
 }
 
-// Schemas with versioning for future migrations
-db.version(1).stores({
-  bairros: '++id, nome, cor',
-  clientes: '++id, bairroId, nome, endereco, tipo, telefone, whatsapp',
-  equipamentos: '++id, clienteId, marca, modelo, btu, localizacao, ultimaManutencao, proximaManutencao',
-  manutencoes: '++id, equipamentoId, dataRealizada, descricao, proximaData'
-});
-
-db.version(2).stores({
-  unidades: '++id, clienteId, apartamento, proprietario, telefone',
-  equipamentos: '++id, clienteId, unidadeId, marca, modelo, btu, localizacao, ultimaManutencao, proximaManutencao'
-});
-
-db.version(3).stores({
-  manutencoes: '++id, equipamentoId, dataRealizada, descricao, proximaData, valor, formaPagamento'
-});
-
-db.version(4).stores({
-  materiais: '++id, nome, categoria, estoque, precoUnitario',
-  materiaisUsados: '++id, manutencaoId, materialId, quantidade',
-  orcamentos: '++id, clienteId, equipamentoId, dataOrcamento, descricao, valor, status',
-  comunicacao: '++id, clienteId, tipo, conteudo, dataCriacao, enviado',
-  analytics: '++id, mes, ano, totalFaturado, totalRecebido, totalPendente'
-});
-
 export async function seedDatabase() {}
+export function setSyncWriteFlag() {}
+
+// ──────────────────────────────────────────────
+// Queries compostas
+// ──────────────────────────────────────────────
 
 export async function getEquipmentWithDetails(equipamentoId) {
   const equipamento = await db.equipamentos.get(equipamentoId);
@@ -50,83 +243,93 @@ export async function getMaintenanceWithDetails(manutencaoId) {
   const manutencao = await db.manutencoes.get(manutencaoId);
   if (!manutencao) return null;
   const details = await getEquipmentWithDetails(manutencao.equipamentoId);
-  const materiaisUsados = await db.materiaisUsados?.where('manutencaoId').equals(manutencaoId).toArray() || [];
-  return { manutencao, ...details, materiaisUsados };
+  return { manutencao, ...details };
 }
 
 export async function getEquipmentsByClient(clienteId) {
-  return await db.equipamentos.where('clienteId').equals(clienteId).toArray();
+  return db.equipamentos.where('clienteId').equals(clienteId).toArray();
 }
 
 export async function getMaintenanceByPeriod(startDate, endDate) {
-  const all = await db.manutencoes.toArray();
-  return all.filter(m => {
-    const date = new Date(m.dataRealizada);
-    return date >= startDate && date <= endDate;
-  });
+  const uid = await getOwnerId();
+  const { data, error } = await supabase
+    .from('manutencoes')
+    .select('*')
+    .eq('owner_id', uid)
+    .gte('data_realizada', startDate.toISOString())
+    .lte('data_realizada', endDate.toISOString());
+  if (error) throw error;
+  return data.map(rowToCamel);
 }
 
 export async function calculateMonthlyRevenue(month, year) {
   const startDate = new Date(year, month, 1);
-  const endDate = new Date(year, month + 1, 0);
+  const endDate = new Date(year, month + 1, 0, 23, 59, 59);
   const manutencoes = await getMaintenanceByPeriod(startDate, endDate);
   return {
     totalBruto: manutencoes.reduce((sum, m) => sum + (Number(m.valor) || 0), 0),
-    recebido: manutencoes.filter(m => m.formaPagamento !== 'Prazo (30 dias)').reduce((sum, m) => sum + (Number(m.valor) || 0), 0),
-    pendente: manutencoes.filter(m => m.formaPagamento === 'Prazo (30 dias)').reduce((sum, m) => sum + (Number(m.valor) || 0), 0),
+    recebido:   manutencoes.filter(m => m.formaPagamento !== 'Prazo (30 dias)').reduce((sum, m) => sum + (Number(m.valor) || 0), 0),
+    pendente:   manutencoes.filter(m => m.formaPagamento === 'Prazo (30 dias)').reduce((sum, m) => sum + (Number(m.valor) || 0), 0),
     count: manutencoes.length
   };
 }
 
 export async function getOverdueEquipments() {
-  const eqs = await db.equipamentos.toArray();
-  const today = new Date();
-  return eqs.filter(e => e.proximaManutencao && new Date(e.proximaManutencao) <= today);
+  const uid = await getOwnerId();
+  const { data, error } = await supabase
+    .from('equipamentos')
+    .select('*')
+    .eq('owner_id', uid)
+    .not('proxima_manutencao', 'is', null)
+    .lte('proxima_manutencao', new Date().toISOString());
+  if (error) throw error;
+  return data.map(rowToCamel);
 }
 
 export async function getUpcomingEquipments(daysAhead = 7) {
-  const eqs = await db.equipamentos.toArray();
+  const uid = await getOwnerId();
   const today = new Date();
   const deadline = new Date(today.getTime() + daysAhead * 24 * 60 * 60 * 1000);
-  return eqs.filter(e => {
-    if (!e.proximaManutencao) return false;
-    const date = new Date(e.proximaManutencao);
-    return date > today && date <= deadline;
-  });
+  const { data, error } = await supabase
+    .from('equipamentos')
+    .select('*')
+    .eq('owner_id', uid)
+    .not('proxima_manutencao', 'is', null)
+    .gt('proxima_manutencao', today.toISOString())
+    .lte('proxima_manutencao', deadline.toISOString());
+  if (error) throw error;
+  return data.map(rowToCamel);
 }
 
 export async function exportDatabase() {
-  const backup = {
-    version: 4,
+  const [bairros, clientes, equipamentos, unidades, manutencoes] = await Promise.all([
+    db.bairros.toArray(),
+    db.clientes.toArray(),
+    db.equipamentos.toArray(),
+    db.unidades.toArray(),
+    db.manutencoes.toArray(),
+  ]);
+  return JSON.stringify({
+    version: 5,
     timestamp: new Date().toISOString(),
-    data: {
-      bairros: await db.bairros.toArray(),
-      clientes: await db.clientes.toArray(),
-      equipamentos: await db.equipamentos.toArray(),
-      unidades: await db.unidades?.toArray() || [],
-      manutencoes: await db.manutencoes.toArray(),
-      materiais: await db.materiais?.toArray() || [],
-      materiaisUsados: await db.materiaisUsados?.toArray() || [],
-      orcamentos: await db.orcamentos?.toArray() || [],
-      comunicacao: await db.comunicacao?.toArray() || []
-    }
-  };
-  return JSON.stringify(backup, null, 2);
+    data: { bairros, clientes, equipamentos, unidades, manutencoes, materiais: [], materiaisUsados: [], orcamentos: [], comunicacao: [] }
+  }, null, 2);
 }
 
 export async function importDatabase(jsonData) {
   try {
     const backup = JSON.parse(jsonData);
-    await db.bairros.clear();
-    await db.clientes.clear();
-    await db.equipamentos.clear();
-    await db.unidades?.clear();
+    const { data } = backup;
     await db.manutencoes.clear();
-    for (const table of Object.keys(backup.data)) {
-      if (db[table] && backup.data[table].length > 0) {
-        await db[table].bulkAdd(backup.data[table]);
-      }
-    }
+    await db.equipamentos.clear();
+    await db.unidades.clear();
+    await db.clientes.clear();
+    await db.bairros.clear();
+    if (data.bairros?.length)      await db.bairros.bulkAdd(data.bairros);
+    if (data.clientes?.length)     await db.clientes.bulkAdd(data.clientes);
+    if (data.unidades?.length)     await db.unidades.bulkAdd(data.unidades);
+    if (data.equipamentos?.length) await db.equipamentos.bulkAdd(data.equipamentos);
+    if (data.manutencoes?.length)  await db.manutencoes.bulkAdd(data.manutencoes);
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
