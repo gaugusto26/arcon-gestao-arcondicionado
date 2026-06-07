@@ -3,7 +3,7 @@
  * Orquestra todos os módulos e gerencia a navegação
  */
 
-import { db, seedDatabase } from './services/db.js';
+import { db } from './services/db.js';
 import { initializeUIElements, openModal, closeModal, CONSTANTS } from './services/ui.js';
 import { syncService } from './services/sync.js';
 import { authService } from './services/auth.js';
@@ -37,17 +37,12 @@ async function init() {
     // Inicializar UI
     initializeUIElements();
     exposeAuthFunctions();
-    authService.ensureTestUsers();
-
     if (!authService.isAuthenticated()) {
       renderAuthScreen();
       hideSplash();
       return;
     }
-    
-    // Seed database se vazio
-    await seedDatabase();
-    
+
     // Configurar sincronização
     syncService.start();
     
@@ -184,7 +179,6 @@ function renderAuthScreen(mode = 'login') {
 }
 
 async function bootAuthenticatedApp() {
-  await seedDatabase();
   syncService.watchConnection();
   setupNavigation();
   updateNavigationAccess();
