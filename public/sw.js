@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ar-jampa-v1';
+const CACHE_NAME = 'arcon-v2';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
