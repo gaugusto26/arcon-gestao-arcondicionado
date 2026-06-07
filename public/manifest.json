@@ -1,21 +1,27 @@
 {
-  "name": "App Gestão de Ar Condicionado",
-  "short_name": "AR JAMPA",
+  "name": "Arcon",
+  "short_name": "Arcon",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#1e1e2e",
-  "theme_color": "#22c55e",
-  "description": "Aplicativo premium para gestão e manutenção.",
+  "background_color": "#0f172a",
+  "theme_color": "#1d4ed8",
+  "description": "Gestão Inteligente para Climatização",
   "icons": [
     {
-      "src": "https://api.dicebear.com/7.x/avataaars/svg?seed=Leo",
+      "src": "icon.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "https://api.dicebear.com/7.x/avataaars/svg?seed=Leo",
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
+    },
+    {
+      "src": "1.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
