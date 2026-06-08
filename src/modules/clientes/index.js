@@ -776,7 +776,7 @@ export async function renderFullPropertyForm(clienteId = null, scheduledServiceD
         btu: Number(document.getElementById('c-btu').value),
         localizacao: document.getElementById('c-local').value,
         ultimaManutencao: null,
-        proximaManutencao: new Date()
+        proximaManutencao: null
       });
     }
 
