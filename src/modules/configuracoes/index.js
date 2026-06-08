@@ -458,7 +458,6 @@ export async function limparTodosDados() {
   if (!confirmacao2) return;
   
   try {
-    await db.bairros.clear();
     await db.clientes.clear();
     await db.equipamentos.clear();
     await db.unidades?.clear();

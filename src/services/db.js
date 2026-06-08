@@ -204,7 +204,6 @@ function makeTable(tableName) {
 // ──────────────────────────────────────────────
 
 export const db = {
-  bairros:         makeTable('bairros'),
   clientes:        makeTable('clientes'),
   unidades:        makeTable('unidades'),
   equipamentos:    makeTable('equipamentos'),
@@ -302,17 +301,16 @@ export async function getUpcomingEquipments(daysAhead = 7) {
 }
 
 export async function exportDatabase() {
-  const [bairros, clientes, equipamentos, unidades, manutencoes] = await Promise.all([
-    db.bairros.toArray(),
+  const [clientes, equipamentos, unidades, manutencoes] = await Promise.all([
     db.clientes.toArray(),
     db.equipamentos.toArray(),
     db.unidades.toArray(),
     db.manutencoes.toArray(),
   ]);
   return JSON.stringify({
-    version: 5,
+    version: 6,
     timestamp: new Date().toISOString(),
-    data: { bairros, clientes, equipamentos, unidades, manutencoes, materiais: [], materiaisUsados: [], orcamentos: [], comunicacao: [] }
+    data: { clientes, equipamentos, unidades, manutencoes, materiais: [], materiaisUsados: [], orcamentos: [], comunicacao: [] }
   }, null, 2);
 }
 
@@ -324,8 +322,6 @@ export async function importDatabase(jsonData) {
     await db.equipamentos.clear();
     await db.unidades.clear();
     await db.clientes.clear();
-    await db.bairros.clear();
-    if (data.bairros?.length)      await db.bairros.bulkAdd(data.bairros);
     if (data.clientes?.length)     await db.clientes.bulkAdd(data.clientes);
     if (data.unidades?.length)     await db.unidades.bulkAdd(data.unidades);
     if (data.equipamentos?.length) await db.equipamentos.bulkAdd(data.equipamentos);

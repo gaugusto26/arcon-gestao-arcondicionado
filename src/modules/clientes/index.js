@@ -65,8 +65,8 @@ function buildAddress(cliente) {
   return parts.join(', ') || cliente.endereco || '';
 }
 
-function getClientGroup(cliente, bairro) {
-  return cliente.grupo || cliente.rota || cliente.tag || cliente.bairroNome || bairro?.nome || 'Sem grupo';
+function getClientGroup(cliente) {
+  return cliente.grupo || cliente.rota || cliente.tag || cliente.bairroEndereco || 'Sem bairro';
 }
 
 function getDueStatus(equipamentos) {
@@ -153,15 +153,13 @@ export async function renderBairros(mainContent, headerContent, searchTerm = '')
   `;
 
   const clientes = await db.clientes.toArray();
-  const bairros = await db.bairros.toArray();
 
   html += '<div class="animate-in" style="display:flex; flex-direction:column; gap:12px; padding:0 20px;">';
 
   let visibleCount = 0;
   for (const cliente of clientes.sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || '')))) {
     const equipamentos = await db.equipamentos.where('clienteId').equals(cliente.id).toArray();
-    const bairro = cliente.bairroId ? bairros.find((item) => item.id === cliente.bairroId) : null;
-    const group = getClientGroup(cliente, bairro);
+    const group = getClientGroup(cliente);
     const dueStatus = getDueStatus(equipamentos);
     const searchable = [
       cliente.nome,
@@ -222,13 +220,14 @@ export async function renderBairros(mainContent, headerContent, searchTerm = '')
 }
 
 /**
- * Compatibilidade: lista clientes de um bairro antigo em modal.
+ * Compatibilidade: lista clientes pelo bairro informado no cadastro do cliente.
  */
-export async function renderBairroDetail(bairroId) {
-  const bairro = await db.bairros.get(bairroId);
-  const clientes = await db.clientes.where('bairroId').equals(bairroId).toArray();
+export async function renderBairroDetail(bairroNome = '') {
+  const normalizedBairro = normalizeText(bairroNome);
+  const clientes = (await db.clientes.toArray())
+    .filter((cliente) => normalizeText(cliente.bairroEndereco) === normalizedBairro);
 
-  openModal(`${bairro?.nome || 'Grupo'} - ${clientes.length} Clientes`);
+  openModal(`${bairroNome || 'Bairro'} - ${clientes.length} Clientes`);
 
   modalBody.innerHTML = `
     <div style="display:flex; flex-direction:column; gap:10px;">
@@ -248,8 +247,7 @@ export async function renderClientDetail(clienteId) {
 
   const equipamentos = await db.equipamentos.where('clienteId').equals(clienteId).toArray();
   const historico = await getClientMaintenances(clienteId, equipamentos);
-  const bairro = cliente.bairroId ? await db.bairros.get(cliente.bairroId) : null;
-  const group = getClientGroup(cliente, bairro);
+  const group = getClientGroup(cliente);
   const phone = cliente.whatsapp || '';
 
   openModal(cliente.nome);
@@ -638,38 +636,8 @@ export async function renderEquipmentForm(clienteId, equipamentoId = null) {
   };
 }
 
-/**
- * Compatibilidade: agora cria um grupo/tag simples.
- */
 export async function renderBairroForm() {
-  openModal('Novo Grupo');
-
-  modalBody.innerHTML = `
-    <form id="f-bairro">
-      <div class="form-group">
-        <label>Nome do Grupo ou Rota</label>
-        <input type="text" id="b-nome" class="form-control" required placeholder="Ex: Rota Segunda, Zona Norte, Contrato Mensal">
-      </div>
-      <div class="form-group">
-        <label>Cor</label>
-        <input type="color" id="b-cor" class="form-control" value="#22c55e" style="cursor:pointer; height:40px;">
-      </div>
-      <button type="submit" class="btn-primary">CRIAR GRUPO</button>
-    </form>
-  `;
-
-  document.getElementById('f-bairro').onsubmit = async (event) => {
-    event.preventDefault();
-    try {
-      await db.bairros.add({
-        nome: document.getElementById('b-nome').value,
-        cor: document.getElementById('b-cor').value
-      });
-      location.reload();
-    } catch (err) {
-      alert('Erro ao salvar grupo: ' + err.message);
-    }
-  };
+  return renderFullPropertyForm();
 }
 
 export async function renderFullPropertyForm(clienteId = null, scheduledServiceDate = null) {
@@ -796,7 +764,6 @@ export async function renderFullPropertyForm(clienteId = null, scheduledServiceD
     }
 
     const newClientId = await db.clientes.add({
-      bairroId: null,
       ...payload
     });
 
@@ -878,7 +845,6 @@ export async function renderContactsImportForm() {
       if (existing) continue;
 
       await db.clientes.add({
-        bairroId: null,
         nome: contact.name,
         endereco: '',
         tipo,

@@ -148,7 +148,6 @@ async function createMessageTestData() {
   }
 
   const overdueClientId = await db.clientes.add({
-    bairroId: null,
     nome: 'Teste Mensagem Vencida',
     tipo: 'Pessoa Fisica',
     logradouro: 'Rua Teste Vencida',
@@ -172,7 +171,6 @@ async function createMessageTestData() {
   });
 
   const scheduledClientId = await db.clientes.add({
-    bairroId: null,
     nome: 'Teste Mensagem Agendada',
     tipo: 'Empresa',
     logradouro: 'Avenida Teste Agenda',

@@ -334,7 +334,7 @@ function exposeGlobalFunctions() {
 }
 
 /**
- * Deletar item genérico (bairro, cliente, equipamento, etc)
+ * Deletar item genérico (cliente, equipamento, unidade, etc)
  */
 async function deleteItem(type, id) {
   if (authService.isEmployee()) {
@@ -347,9 +347,6 @@ async function deleteItem(type, id) {
   
   try {
     switch (type) {
-      case 'bairro':
-        await db.bairros.delete(id);
-        break;
       case 'cliente':
         await db.clientes.delete(id);
         break;
