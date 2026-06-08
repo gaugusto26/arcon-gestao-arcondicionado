@@ -23,8 +23,8 @@ PWA offline-first para técnicos e empresas de manutenção de ar-condicionado. 
 **Pré-requisito:** Node.js 18+
 
 ```bash
-git clone https://github.com/leosoprani/manutencao-ar-condicionado.git
-cd manutencao-ar-condicionado
+git clone https://github.com/gaugusto26/arcon-gestao-arcondicionado.git
+cd arcon-gestao-arcondicionado
 npm install
 npm run dev
 ```
