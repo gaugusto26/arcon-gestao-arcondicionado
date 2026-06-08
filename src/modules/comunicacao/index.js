@@ -27,6 +27,15 @@ function daysUntil(value) {
   return Math.ceil((target - today) / 86400000);
 }
 
+function isScheduleReminderWindow() {
+  const hour = new Date().getHours();
+  return hour >= 17 && hour < 18;
+}
+
+function shouldPrepareScheduleReminder(service) {
+  return daysUntil(service.dataAgendada) === 1 && isScheduleReminderWindow();
+}
+
 function buildAddress(cliente) {
   if (!cliente) return '';
   const streetNumber = [cliente.logradouro, cliente.numero].filter(Boolean).join(', ');
@@ -90,6 +99,7 @@ async function getAutomationItems() {
 
   const scheduled = manutencoes
     .filter((item) => item.status === 'agendado' && item.dataAgendada)
+    .filter(shouldPrepareScheduleReminder)
     .sort((a, b) => new Date(a.dataAgendada) - new Date(b.dataAgendada))
     .map((service) => {
       const cliente = clientes.find((item) => item.id === service.clientId);
