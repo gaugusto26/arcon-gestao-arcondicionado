@@ -243,7 +243,7 @@ export async function renderComunicacao(mainContent, headerContent) {
           O app prepara as mensagens automaticamente. Pelo WhatsApp comum, o envio precisa ser confirmado por voce.
         </p>
         <p style="font-size:11px; line-height:1.45; margin:10px 0 0 0; color:var(--primary); font-weight:800;">
-          Breve integracao com WhatsApp e automacoes de mensagens.
+          Breve integração com WhatsApp e automações de mensagens.
         </p>
         <button class="btn-primary" onclick="window.createMessageTestData()" style="background:#8b5cf6; margin-top:12px;">
           CRIAR DADOS DE TESTE
