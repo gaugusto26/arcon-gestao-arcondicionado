@@ -97,7 +97,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
         `).join(``):`<p style="text-align:center; opacity:0.4; padding:25px 0; font-size:12px;">Nenhum item neste mes.</p>`}
       </div>
     </div>
-  `}async function Z(e,t,n=``){window.setHomeView=ja,window.changeCalendarMonth=Ma,window.renderCalendarServicePicker=Fa;let r=Y.getTechnicianData(),i=Y.isAdmin();new Date().getHours();let a=fa(),o=await G.equipamentos.toArray(),s=(await G.manutencoes.toArray()).filter(e=>e.status===`agendado`),c=o.some(e=>e.proximaManutencao&&da(e.proximaManutencao)<=7)||s.some(e=>e.dataAgendada&&da(e.dataAgendada)<=7)?`<span style="position:absolute; top:0; right:0; width:10px; height:10px; background:#ff4d4d; border-radius:50%; border:2px solid var(--bg);"></span>`:``;t.innerHTML=`
+  `}async function Z(e,t,n=``){window.setHomeView=ja,window.changeCalendarMonth=Ma,window.renderCalendarServicePicker=Fa;let r=Y.getTechnicianData(),i=Y.isAdmin();new Date().getHours();let a=fa(),[o,s,c,l]=await Promise.all([G.equipamentos.toArray(),G.manutencoes.toArray(),G.clientes.toArray(),G.unidades?.toArray()||[]]),u=s.filter(e=>e.status===`agendado`),d=o.some(e=>e.proximaManutencao&&da(e.proximaManutencao)<=7)||u.some(e=>e.dataAgendada&&da(e.dataAgendada)<=7)?`<span style="position:absolute; top:0; right:0; width:10px; height:10px; background:#ff4d4d; border-radius:50%; border:2px solid var(--bg);"></span>`:``;t.innerHTML=`
     <div class="user-info">
       <div class="user-profile"><img src="${ca(r.avatar)}"></div>
       <div class="user-text">
@@ -110,13 +110,13 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
         <span class="material-symbols-rounded">bar_chart</span>
       </div>`:``}
       <div class="icon-btn" style="position:relative;" onclick="window.showNotifications()">
-        <span class="material-symbols-rounded">notifications</span>${c}
+        <span class="material-symbols-rounded">notifications</span>${d}
       </div>
       <div class="icon-btn" onclick="window.logoutApp()" style="background:rgba(239,68,68,0.1); color:#ef4444;">
         <span class="material-symbols-rounded">logout</span>
       </div>
     </div>
-  `;let l=`
+  `;let f=`
     <div class="page-header animate-in" style="padding: 0 20px;">
       <h2 style="font-size: 24px; margin:0; font-weight:800;">Agenda</h2>
       <div style="display:flex; gap:8px; padding:14px 0 0;">
@@ -138,14 +138,14 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
         <input type="text" id="main-search" placeholder="Buscar cliente..." value="${n}">
       </div>
     </div>
-  `,u=await G.equipamentos.toArray(),d=await G.clientes.toArray(),f=await G.unidades?.toArray()||[],p=Y.getBusinessMode()===`empresa`,m=p?Y.getUsers():[],h=Y.getCurrentUser(),ee=(await G.manutencoes.toArray()).filter(e=>e.status===`agendado`).filter(e=>va===`calendario`||Ea(e.dataAgendada)).filter(e=>!Y.isEmployee()||e.tecnicoId===h?.id).sort((e,t)=>new Date(e.dataAgendada)-new Date(t.dataAgendada));if(va===`calendario`){e.innerHTML=l+Oa(Da(u,d,ee),i);return}let g=u.filter(e=>e.proximaManutencao&&Ea(e.proximaManutencao)).sort((e,t)=>new Date(e.proximaManutencao)-new Date(t.proximaManutencao));l+=`<div class="dashboard-grid animate-in">`;for(let e of ee){let t=e.clientId?d.find(t=>t.id===e.clientId):null,r=e.equipamentoId?u.find(t=>t.id===e.equipamentoId):null,a=t?.nome||`Cliente`,o=Sa(t),s=o?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o)}`:``,c=t?.whatsapp?`https://wa.me/${String(t.whatsapp).replace(/\D/g,``)}`:``,f=e.tecnicoId?m.find(t=>t.id===e.tecnicoId):null;n&&!a.toLowerCase().includes(n.toLowerCase())||(l+=`
+  `,p=Y.getBusinessMode()===`empresa`,m=p?Y.getUsers():[],h=Y.getCurrentUser(),ee=s.filter(e=>e.status===`agendado`).filter(e=>va===`calendario`||Ea(e.dataAgendada)).filter(e=>!Y.isEmployee()||e.tecnicoId===h?.id).sort((e,t)=>new Date(e.dataAgendada)-new Date(t.dataAgendada));if(va===`calendario`){e.innerHTML=f+Oa(Da(o,c,ee),i);return}let g=o.filter(e=>e.proximaManutencao&&Ea(e.proximaManutencao)).sort((e,t)=>new Date(e.proximaManutencao)-new Date(t.proximaManutencao));f+=`<div class="dashboard-grid animate-in">`;for(let e of ee){let t=e.clientId?c.find(t=>t.id===e.clientId):null,r=e.equipamentoId?o.find(t=>t.id===e.equipamentoId):null,a=t?.nome||`Cliente`,s=Sa(t),l=s?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s)}`:``,u=t?.whatsapp?`https://wa.me/${String(t.whatsapp).replace(/\D/g,``)}`:``,d=e.tecnicoId?m.find(t=>t.id===e.tecnicoId):null;n&&!a.toLowerCase().includes(n.toLowerCase())||(f+=`
       <div class="card" style="grid-column: span 2; margin-left:0; margin-right:0; border-left:5px solid #0ea5e9;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
           <div style="min-width:0;">
             <p style="font-size:8px; font-weight:900; color:#0ea5e9; margin:0 0 6px 0;">SERVIÇO AGENDADO</p>
             <h3 style="font-size:14px; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a}</h3>
             <p style="font-size:10px; opacity:0.65; margin:5px 0 0 0;">${e.tipoServico||`Serviço`} • ${r?`${r.marca} - ${r.localizacao||`Local não informado`}`:`Equipamento a definir`}</p>
-            ${f?`<p style="font-size:9px; margin:5px 0 0 0; color:#a78bfa; font-weight:700;">TÉCNICO: ${f.name}</p>`:p?`<p style="font-size:9px; margin:5px 0 0 0; opacity:0.4;">Sem técnico atribuído</p>`:``}
+            ${d?`<p style="font-size:9px; margin:5px 0 0 0; color:#a78bfa; font-weight:700;">TÉCNICO: ${d.name}</p>`:p?`<p style="font-size:9px; margin:5px 0 0 0; opacity:0.4;">Sem técnico atribuído</p>`:``}
           </div>
           <span style="font-size:10px; font-weight:900; color:#0ea5e9;">${xa(e.dataAgendada)}</span>
         </div>
@@ -154,11 +154,11 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
           ${t?`<button class="btn-primary" onclick="window.renderNewServiceLaunch(${t.id}, ${r?.id||`null`})" style="margin-top:0; background:#7c3aed; font-size:9px; padding:10px 6px;">NOVO SERVIÇO</button>`:``}
         </div>`:``}
         <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:8px;">
-          ${s?`<a class="btn-primary" href="${s}" target="_blank" style="margin-top:0; background:#0ea5e9; font-size:9px; padding:10px 6px; text-decoration:none;">MAPS</a>`:`<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">MAPS</button>`}
-          ${c?`<a class="btn-primary" href="${c}" target="_blank" style="margin-top:0; background:#25D366; font-size:9px; padding:10px 6px; text-decoration:none;">WHATSAPP</a>`:`<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">WHATSAPP</button>`}
+          ${l?`<a class="btn-primary" href="${l}" target="_blank" style="margin-top:0; background:#0ea5e9; font-size:9px; padding:10px 6px; text-decoration:none;">MAPS</a>`:`<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">MAPS</button>`}
+          ${u?`<a class="btn-primary" href="${u}" target="_blank" style="margin-top:0; background:#25D366; font-size:9px; padding:10px 6px; text-decoration:none;">WHATSAPP</a>`:`<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">WHATSAPP</button>`}
         </div>
       </div>
-    `)}for(let e of g){let t=d.find(t=>t.id===e.clienteId),r=e.unidadeId&&f?f.find(t=>t.id===e.unidadeId):null,a=r?`${t.nome} • ${r.apartamento}`:t?t.nome:`Desconhecido`;if(!t||n&&!a.toLowerCase().includes(n.toLowerCase())&&!e.marca.toLowerCase().includes(n.toLowerCase()))continue;let o=da(e.proximaManutencao),s=r?.telefone||t.whatsapp||t.telefone||``,c=Sa(t),u=c?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c)}`:``,p=s?`https://wa.me/${String(s).replace(/\D/g,``)}`:``;l+=`
+    `)}for(let e of g){let t=c.find(t=>t.id===e.clienteId),r=e.unidadeId&&l?l.find(t=>t.id===e.unidadeId):null,a=r?`${t.nome} • ${r.apartamento}`:t?t.nome:`Desconhecido`;if(!t||n&&!a.toLowerCase().includes(n.toLowerCase())&&!e.marca.toLowerCase().includes(n.toLowerCase()))continue;let o=da(e.proximaManutencao),s=r?.telefone||t.whatsapp||t.telefone||``,u=Sa(t),d=u?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(u)}`:``,p=s?`https://wa.me/${String(s).replace(/\D/g,``)}`:``;f+=`
       <div class="card" style="grid-column: span 2; margin-left:0; margin-right:0;">
         <div style="display: flex; align-items: center; gap: 15px;">
           <div style="width:42px; height:42px; background:white; border-radius:10px; padding:8px;">
@@ -193,11 +193,11 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
                   style="margin-top:0; background:#7c3aed; font-size:9px; padding:10px 6px;">NOVO SERVIÇO</button>
         </div>`:``}
         <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:8px;">
-          ${u?`<a class="btn-primary" href="${u}" target="_blank" style="margin-top:0; background:#0ea5e9; font-size:9px; padding:10px 6px; text-decoration:none;">MAPS</a>`:`<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">MAPS</button>`}
+          ${d?`<a class="btn-primary" href="${d}" target="_blank" style="margin-top:0; background:#0ea5e9; font-size:9px; padding:10px 6px; text-decoration:none;">MAPS</a>`:`<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">MAPS</button>`}
           ${p?`<a class="btn-primary" href="${p}" target="_blank" style="margin-top:0; background:#25D366; font-size:9px; padding:10px 6px; text-decoration:none;">WHATSAPP</a>`:`<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">WHATSAPP</button>`}
         </div>
       </div>
-    `}e.innerHTML=l+`</div>`;let te=document.getElementById(`main-search`);te&&(te.oninput=n=>Z(e,t,n.target.value))}async function ka(){q(`Notificações`);let e=Y.isAdmin(),t=Y.getBusinessMode()===`empresa`?Y.getUsers():[],n=await G.equipamentos.toArray(),r=await G.clientes.toArray(),i=await G.unidades?.toArray()||[],a=Y.getCurrentUser(),o=(await G.manutencoes.toArray()).filter(e=>e.status===`agendado`&&e.dataAgendada&&da(e.dataAgendada)<=7).filter(e=>!Y.isEmployee()||e.tecnicoId===a?.id).sort((e,t)=>new Date(e.dataAgendada)-new Date(t.dataAgendada)),s=n.filter(e=>e.proximaManutencao&&da(e.proximaManutencao)<=7).sort((e,t)=>new Date(e.proximaManutencao)-new Date(t.proximaManutencao));if(s.length===0&&o.length===0){K.innerHTML=`
+    `}e.innerHTML=f+`</div>`;let te=document.getElementById(`main-search`);te&&(te.oninput=n=>Z(e,t,n.target.value))}async function ka(){q(`Notificações`);let e=Y.isAdmin(),t=Y.getBusinessMode()===`empresa`?Y.getUsers():[],n=await G.equipamentos.toArray(),r=await G.clientes.toArray(),i=await G.unidades?.toArray()||[],a=Y.getCurrentUser(),o=(await G.manutencoes.toArray()).filter(e=>e.status===`agendado`&&e.dataAgendada&&da(e.dataAgendada)<=7).filter(e=>!Y.isEmployee()||e.tecnicoId===a?.id).sort((e,t)=>new Date(e.dataAgendada)-new Date(t.dataAgendada)),s=n.filter(e=>e.proximaManutencao&&da(e.proximaManutencao)<=7).sort((e,t)=>new Date(e.proximaManutencao)-new Date(t.proximaManutencao));if(s.length===0&&o.length===0){K.innerHTML=`
       <div style="padding:20px; text-align:center; opacity:0.5;">
         <span class="material-symbols-rounded" style="font-size:40px; display:block; margin-bottom:10px;">notifications_off</span>
         Nenhuma notificação no momento.
@@ -314,7 +314,7 @@ ${t?t+`: `:``}        </textarea>
         <p style="margin:5px 0 0 0; font-size:20px; font-weight:800;">R$ ${a.totalBruto.toFixed(2)}</p>
       </div>
     </div>
-  `}function Ra(){return`contacts`in navigator&&`ContactsManager`in window}async function za(){if(!Ra())throw Error(`Contact Picker API não suportada neste navegador.`);let e=await navigator.contacts.getProperties(),t=[`name`,`tel`].filter(t=>e.includes(t));if(!t.includes(`tel`))throw Error(`Este navegador não liberou telefones dos contatos.`);return navigator.contacts.select(t,{multiple:!0})}async function Ba(e){let t=await e.text();return e.name.split(`.`).pop().toLowerCase()===`vcf`||t.includes(`BEGIN:VCARD`)?Va(t):Ua(t)}function Va(e){return e.split(/END:VCARD/i).map(e=>{let t=Ha(e,`FN`)||Ha(e,`N`),n=Ha(e,`TEL`);return Ka({name:[t].filter(Boolean),tel:[n].filter(Boolean)})}).filter(e=>e.name&&e.phone)}function Ha(e,t){let n=e.split(/\r?\n/).find(e=>e.toUpperCase().startsWith(t)||e.toUpperCase().startsWith(`${t};`));return n?n.slice(n.indexOf(`:`)+1).replace(/\\,/g,`,`).replace(/\\;/g,`;`).trim():``}function Ua(e){let t=e.split(/\r?\n/).filter(e=>e.trim());if(t.length===0)return[];let n=Wa(t[0]).map(e=>e.trim().toLowerCase()),r=Ga(n,[`nome`,`name`,`contato`,`contact`]),i=Ga(n,[`telefone`,`phone`,`tel`,`celular`,`whatsapp`]);return t.slice(1).map(e=>{let t=Wa(e);return Ka({name:[t[r]||t[0]],tel:[t[i]||t[1]]})}).filter(e=>e.name&&e.phone)}function Wa(e){let t=[],n=``,r=!1;for(let i=0;i<e.length;i+=1){let a=e[i];a===`"`?r=!r:a===`,`&&!r?(t.push(n.trim()),n=``):n+=a}return t.push(n.trim()),t}function Ga(e,t){let n=e.findIndex(e=>t.includes(e));return n>=0?n:-1}function Ka(e){let t=Array.isArray(e.name)?e.name[0]:e.name,n=Array.isArray(e.tel)?e.tel[0]:e.tel,r=String(n||``).replace(/[^\d+]/g,``);return{name:String(t||``).trim(),phone:r}}var qa=`todos`,Ja=[`Pessoa Fisica`,`Condominio`,`Empresa`,`Comercial`,`Industrial`],Ya=[`Limpeza`,`Carga de Gas`,`Manutencao Preventiva`,`Manutencao Corretiva`,`Instalacao`,`Desinstalacao`,`Outro`];function Xa(e=new Date){let t=new Date(e);return new Date(t.getTime()-t.getTimezoneOffset()*6e4).toISOString().slice(0,16)}function Za(e=new Date){if(typeof e==`string`&&/^\d{4}-\d{2}-\d{2}$/.test(e))return e;let t=new Date(e);return new Date(t.getTime()-t.getTimezoneOffset()*6e4).toISOString().slice(0,10)}function Qa(e){return(typeof e==`string`&&/^\d{4}-\d{2}-\d{2}$/.test(e)?new Date(`${e}T00:00:00`):new Date(e)).toLocaleDateString(`pt-BR`)}function $a(e){return e?new Date(e).toLocaleString(`pt-BR`,{day:`2-digit`,month:`2-digit`,year:`numeric`,hour:`2-digit`,minute:`2-digit`}):`---`}function eo(e){return String(e||``).toLowerCase()}function to(e){if(!e)return``;let t=[e.logradouro,e.numero].filter(Boolean).join(`, `),n=[e.cidade,e.estado].filter(Boolean).join(` - `);return[t,e.complemento,e.bairroEndereco,n,e.cep].filter(Boolean).join(`, `)||e.endereco||``}function no(e){return e.grupo||e.rota||e.tag||e.bairroEndereco||`Sem bairro`}function ro(e){let t=e.filter(e=>e.proximaManutencao).map(e=>new Date(e.proximaManutencao));if(t.length===0)return{label:`Sem agenda`,color:`rgba(255,255,255,0.45)`,status:`sem-agenda`};let n=t.sort((e,t)=>e-t)[0],r=new Date;r.setHours(0,0,0,0),n.setHours(0,0,0,0);let i=Math.ceil((n-r)/864e5);return i<=0?{label:`Vencido`,color:`#ff4d4d`,status:`vencido`}:i<=15?{label:`Em ${i}d`,color:`#ff9d00`,status:`proximo`}:{label:`Em ${i}d`,color:`#22c55e`,status:`ok`}}function io(e,t){let n=eo(e.tipo);return qa===`todos`?!0:qa===`proximos`?t.status===`proximo`:qa===`vencidos`?t.status===`vencido`:qa===`pessoa`?n.includes(`pessoa`)||n.includes(`resid`):qa===`condominio`?n.includes(`condom`)||n.includes(`edif`):qa===`empresa`?n.includes(`empresa`)||n.includes(`comercial`)||n.includes(`industrial`):!0}async function ao(e,t){let n=t.map(e=>e.id);return(await G.manutencoes.toArray()).filter(t=>t.clientId===e||n.includes(t.equipamentoId)).sort((e,t)=>new Date(t.dataRealizada||t.dataAgendada||0)-new Date(e.dataRealizada||e.dataAgendada||0))}function oo(e){qa=e,so(document.getElementById(`main-content`),document.getElementById(`header-content`))}async function so(e,t,n=``){window.setClientFilter=oo,t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">CLIENTES</h2>`;let r=`
+  `}function Ra(){return!!(window.isSecureContext&&`contacts`in navigator&&`ContactsManager`in window)}function za(){return window.isSecureContext?!(`contacts`in navigator)||!(`ContactsManager`in window)?`Este navegador não permite selecionar contatos diretamente. Exporte seus contatos como .vcf ou .csv e importe pelo arquivo.`:`A seleção direta de contatos não está disponível neste navegador. Use a importação por arquivo .vcf/.csv.`:`A seleção direta de contatos só funciona em acesso seguro (HTTPS ou localhost). Use a importação por arquivo .vcf/.csv neste acesso.`}async function Ba(){if(!Ra())throw Error(za());let e=await navigator.contacts.getProperties(),t=[`name`,`tel`].filter(t=>e.includes(t));if(!t.includes(`tel`))throw Error(`Este navegador não liberou telefones dos contatos.`);return navigator.contacts.select(t,{multiple:!0})}async function Va(e){let t=await e.text();return e.name.split(`.`).pop().toLowerCase()===`vcf`||t.includes(`BEGIN:VCARD`)?Ha(t):Wa(t)}function Ha(e){return e.split(/END:VCARD/i).map(e=>{let t=Ua(e,`FN`)||Ua(e,`N`),n=Ua(e,`TEL`);return Ja({name:[t].filter(Boolean),tel:[n].filter(Boolean)})}).filter(e=>e.name&&e.phone)}function Ua(e,t){let n=e.split(/\r?\n/).find(e=>e.toUpperCase().startsWith(t)||e.toUpperCase().startsWith(`${t};`));return n?n.slice(n.indexOf(`:`)+1).replace(/\\,/g,`,`).replace(/\\;/g,`;`).trim():``}function Wa(e){let t=e.split(RegExp(`\\r?\\n`)).filter(e=>e.trim());if(t.length===0)return[];let n=Ga(t[0]),r=Ka(t[0],n).map(e=>e.trim().toLowerCase()),i=qa(r,[`nome`,`name`,`contato`,`contact`,`nome completo`,`full name`]),a=qa(r,[`telefone`,`phone`,`tel`,`celular`,`whatsapp`,`mobile`,`phone 1 - value`]);return t.slice(1).map(e=>{let t=Ka(e,n);return Ja({name:[t[i]||t[0]],tel:[t[a]||t[1]]})}).filter(e=>e.name&&e.phone)}function Ga(e){return[`,`,`;`,`	`].map(t=>({delimiter:t,count:Ka(e,t).length})).sort((e,t)=>t.count-e.count)[0].delimiter}function Ka(e,t=`,`){let n=[],r=``,i=!1;for(let a=0;a<e.length;a+=1){let o=e[a],s=e[a+1];o===`"`&&i&&s===`"`?(r+=`"`,a+=1):o===`"`?i=!i:o===t&&!i?(n.push(r.trim()),r=``):r+=o}return n.push(r.trim()),n}function qa(e,t){let n=e.findIndex(e=>t.includes(e));return n>=0?n:-1}function Ja(e){let t=Array.isArray(e.name)?e.name[0]:e.name,n=Array.isArray(e.tel)?e.tel[0]:e.tel,r=String(n||``).replace(/[^\d+]/g,``);return{name:String(t||``).trim(),phone:r}}var Ya=`todos`,Xa=[`Pessoa Fisica`,`Condominio`,`Empresa`,`Comercial`,`Industrial`],Za=[`Limpeza`,`Carga de Gas`,`Manutencao Preventiva`,`Manutencao Corretiva`,`Instalacao`,`Desinstalacao`,`Outro`];function Qa(e=new Date){let t=new Date(e);return new Date(t.getTime()-t.getTimezoneOffset()*6e4).toISOString().slice(0,16)}function $a(e=new Date){if(typeof e==`string`&&/^\d{4}-\d{2}-\d{2}$/.test(e))return e;let t=new Date(e);return new Date(t.getTime()-t.getTimezoneOffset()*6e4).toISOString().slice(0,10)}function eo(e){return(typeof e==`string`&&/^\d{4}-\d{2}-\d{2}$/.test(e)?new Date(`${e}T00:00:00`):new Date(e)).toLocaleDateString(`pt-BR`)}function to(e){return e?new Date(e).toLocaleString(`pt-BR`,{day:`2-digit`,month:`2-digit`,year:`numeric`,hour:`2-digit`,minute:`2-digit`}):`---`}function no(e){return String(e||``).toLowerCase()}function ro(e){if(!e)return``;let t=[e.logradouro,e.numero].filter(Boolean).join(`, `),n=[e.cidade,e.estado].filter(Boolean).join(` - `);return[t,e.complemento,e.bairroEndereco,n,e.cep].filter(Boolean).join(`, `)||e.endereco||``}function io(e){return e.grupo||e.rota||e.tag||e.bairroEndereco||`Sem bairro`}function ao(e){let t=e.filter(e=>e.proximaManutencao).map(e=>new Date(e.proximaManutencao));if(t.length===0)return{label:`Sem agenda`,color:`rgba(255,255,255,0.45)`,status:`sem-agenda`};let n=t.sort((e,t)=>e-t)[0],r=new Date;r.setHours(0,0,0,0),n.setHours(0,0,0,0);let i=Math.ceil((n-r)/864e5);return i<=0?{label:`Vencido`,color:`#ff4d4d`,status:`vencido`}:i<=15?{label:`Em ${i}d`,color:`#ff9d00`,status:`proximo`}:{label:`Em ${i}d`,color:`#22c55e`,status:`ok`}}function oo(e,t){let n=no(e.tipo);return Ya===`todos`?!0:Ya===`proximos`?t.status===`proximo`:Ya===`vencidos`?t.status===`vencido`:Ya===`pessoa`?n.includes(`pessoa`)||n.includes(`resid`):Ya===`condominio`?n.includes(`condom`)||n.includes(`edif`):Ya===`empresa`?n.includes(`empresa`)||n.includes(`comercial`)||n.includes(`industrial`):!0}async function so(e,t){let n=t.map(e=>e.id);return(await G.manutencoes.toArray()).filter(t=>t.clientId===e||n.includes(t.equipamentoId)).sort((e,t)=>new Date(t.dataRealizada||t.dataAgendada||0)-new Date(e.dataRealizada||e.dataAgendada||0))}function co(e){Ya=e,lo(document.getElementById(`main-content`),document.getElementById(`header-content`))}async function lo(e,t,n=``){window.setClientFilter=co,t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">CLIENTES</h2>`;let r=`
     <div class="page-header animate-in" style="padding: 0 20px;">
       <div class="search-box">
         <span class="material-symbols-rounded">search</span>
@@ -323,7 +323,7 @@ ${t?t+`: `:``}        </textarea>
 
       <div style="display:flex; gap:8px; overflow-x:auto; padding:14px 0; scrollbar-width:none;">
         ${[[`todos`,`TODOS`],[`pessoa`,`PESSOA`],[`condominio`,`CONDOMINIO`],[`empresa`,`EMPRESA`],[`proximos`,`PROXIMOS`],[`vencidos`,`VENCIDOS`]].map(([e,t])=>`
-          <button class="pill ${qa===e?`active`:``}" onclick="window.setClientFilter('${e}')">${t}</button>
+          <button class="pill ${Ya===e?`active`:``}" onclick="window.setClientFilter('${e}')">${t}</button>
         `).join(``)}
       </div>
 
@@ -334,7 +334,7 @@ ${t?t+`: `:``}        </textarea>
         </button>
       </div>
     </div>
-  `,i=await G.clientes.toArray();r+=`<div class="animate-in" style="display:flex; flex-direction:column; gap:12px; padding:0 20px;">`;let a=0;for(let e of i.sort((e,t)=>String(e.nome||``).localeCompare(String(t.nome||``)))){let t=await G.equipamentos.where(`clienteId`).equals(e.id).toArray(),i=no(e),o=ro(t),s=[e.nome,e.whatsapp,e.tipo,to(e),i].map(eo).join(` `);if(n&&!s.includes(eo(n))||!io(e,o))continue;a+=1;let c=e.whatsapp||``,l=String(c).replace(/\D/g,``),u=l?`
+  `,i=await G.clientes.toArray();r+=`<div class="animate-in" style="display:flex; flex-direction:column; gap:12px; padding:0 20px;">`;let a=0;for(let e of i.sort((e,t)=>String(e.nome||``).localeCompare(String(t.nome||``)))){let t=await G.equipamentos.where(`clienteId`).equals(e.id).toArray(),i=io(e),o=ao(t),s=[e.nome,e.whatsapp,e.tipo,ro(e),i].map(no).join(` `);if(n&&!s.includes(no(n))||!oo(e,o))continue;a+=1;let c=e.whatsapp||``,l=String(c).replace(/\D/g,``),u=l?`
       <a href="https://wa.me/${l}" target="_blank" class="icon-btn success" style="width:34px; height:34px;">
         <span class="material-symbols-rounded" style="font-size:16px;">chat</span>
       </a>
@@ -347,7 +347,7 @@ ${t?t+`: `:``}        </textarea>
               <span style="font-size:8px; font-weight:900; padding:3px 7px; border-radius:20px; background:rgba(255,255,255,0.06); color:${o.color}; border:1px solid ${o.color};">${o.label}</span>
             </div>
             <p style="margin:0; font-size:10px; opacity:0.65; font-weight:700;">${e.tipo||`Cliente`} • ${i}</p>
-            <p style="margin:5px 0 0 0; font-size:10px; opacity:0.55; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${to(e)||`Endereço não informado`}</p>
+            <p style="margin:5px 0 0 0; font-size:10px; opacity:0.55; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${ro(e)||`Endereço não informado`}</p>
             <p style="margin:8px 0 0 0; font-size:9px; color:var(--primary); font-weight:800;">${t.length} EQUIPAMENTO(S)</p>
           </div>
           <div style="display:flex; gap:8px; align-items:center;">
@@ -363,16 +363,16 @@ ${t?t+`: `:``}        </textarea>
         <span class="material-symbols-rounded" style="font-size:42px; display:block; margin-bottom:10px;">person_search</span>
         Nenhum cliente encontrado.
       </div>
-    `),e.innerHTML=r+`</div>`;let o=document.getElementById(`b-search`);o&&(o.oninput=n=>so(e,t,n.target.value))}async function co(e=``){let t=eo(e),n=(await G.clientes.toArray()).filter(e=>eo(e.bairroEndereco)===t);q(`${e||`Bairro`} - ${n.length} Clientes`),K.innerHTML=`
+    `),e.innerHTML=r+`</div>`;let o=document.getElementById(`b-search`);o&&(o.oninput=n=>lo(e,t,n.target.value))}async function uo(e=``){let t=no(e),n=(await G.clientes.toArray()).filter(e=>no(e.bairroEndereco)===t);q(`${e||`Bairro`} - ${n.length} Clientes`),K.innerHTML=`
     <div style="display:flex; flex-direction:column; gap:10px;">
       ${n.map(e=>`
         <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:8px; cursor:pointer;" onclick="window.renderClientDetail(${e.id})">
           <h4 style="margin:0; font-size:13px; font-weight:700;">${e.nome}</h4>
-          <p style="margin:4px 0 0 0; font-size:10px; opacity:0.6;">${to(e)}</p>
+          <p style="margin:4px 0 0 0; font-size:10px; opacity:0.6;">${ro(e)}</p>
         </div>
       `).join(``)||`<p style="font-size:10px; opacity:0.5;">Nenhum cliente neste grupo.</p>`}
     </div>
-  `}async function lo(e){let t=await G.clientes.get(e);if(!t)return;let n=await G.equipamentos.where(`clienteId`).equals(e).toArray(),r=await ao(e,n),i=no(t),a=t.whatsapp||``;q(t.nome),K.innerHTML=`
+  `}async function fo(e){let t=await G.clientes.get(e);if(!t)return;let n=await G.equipamentos.where(`clienteId`).equals(e).toArray(),r=await so(e,n),i=io(t),a=t.whatsapp||``;q(t.nome),K.innerHTML=`
     <div style="display:flex; flex-direction:column; gap:12px;">
       <div style="background:rgba(255,255,255,0.04); padding:12px; border-radius:8px;">
         <label style="font-size:9px; opacity:0.6; font-weight:700;">TIPO / GRUPO</label>
@@ -380,7 +380,7 @@ ${t?t+`: `:``}        </textarea>
       </div>
       <div style="background:rgba(255,255,255,0.04); padding:12px; border-radius:8px;">
         <label style="font-size:9px; opacity:0.6; font-weight:700;">ENDERECO</label>
-        <p style="margin:5px 0 0 0; font-size:12px;">${to(t)||`Nao informado`}</p>
+        <p style="margin:5px 0 0 0; font-size:12px;">${ro(t)||`Nao informado`}</p>
       </div>
       <div style="background:rgba(255,255,255,0.04); padding:12px; border-radius:8px;">
         <label style="font-size:9px; opacity:0.6; font-weight:700;">CONTATO</label>
@@ -429,7 +429,7 @@ ${t?t+`: `:``}        </textarea>
               <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; border-left:3px solid #22c55e;">
                 <div style="display:flex; justify-content:space-between; gap:8px;">
                   <p style="margin:0; font-size:11px; font-weight:800;">${e.tipoServico||`Serviço`} ${e.status===`agendado`?`(Agendado)`:``}</p>
-                  <p style="margin:0; font-size:9px; opacity:0.55;">${$a(e.dataRealizada||e.dataAgendada)}</p>
+                  <p style="margin:0; font-size:9px; opacity:0.55;">${to(e.dataRealizada||e.dataAgendada)}</p>
                 </div>
                 <p style="margin:5px 0 0 0; font-size:10px; opacity:0.75;">${e.descricao||`-`}</p>
                 <p style="margin:5px 0 0 0; font-size:9px; opacity:0.55;">${t?`${t.marca} • ${t.localizacao||`Local não informado`}`:`Serviço do cliente`}</p>
@@ -442,7 +442,7 @@ ${t?t+`: `:``}        </textarea>
         </div>
       </div>
     </div>
-  `}async function uo(e,t=`agendado`,n=null,r=null,i=!1){let a=await G.clientes.get(e),o=await G.equipamentos.where(`clienteId`).equals(e).toArray(),s=Y.isAdmin()&&Y.getBusinessMode()===`empresa`,c=s?Y.getUsers().filter(e=>e.role===`tecnico`):[];q(`Servico - ${a?.nome||`Cliente`}`),K.innerHTML=`
+  `}async function po(e,t=`agendado`,n=null,r=null,i=!1){let a=await G.clientes.get(e),o=await G.equipamentos.where(`clienteId`).equals(e).toArray(),s=Y.isAdmin()&&Y.getBusinessMode()===`empresa`,c=s?Y.getUsers().filter(e=>e.role===`tecnico`):[];q(`Servico - ${a?.nome||`Cliente`}`),K.innerHTML=`
     <form id="f-client-service">
       <div class="form-group">
         <label>Lançamento</label>
@@ -454,7 +454,7 @@ ${t?t+`: `:``}        </textarea>
       <div class="form-group">
         <label>Tipo de Serviço</label>
         <select id="s-tipo" class="form-control">
-          ${Ya.map(e=>`<option value="${e}">${e}</option>`).join(``)}
+          ${Za.map(e=>`<option value="${e}">${e}</option>`).join(``)}
         </select>
       </div>
       <div class="form-group">
@@ -519,7 +519,7 @@ ${t?t+`: `:``}        </textarea>
       `:``}
       <button type="submit" class="btn-primary">SALVAR SERVICO</button>
     </form>
-  `;let l=document.getElementById(`s-status`),u=document.getElementById(`s-agendada`),d=document.getElementById(`s-agendada-data`),f=document.getElementById(`s-agendada-hora`),p=document.getElementById(`s-proxima-wrap`);i?(d.value=Za(r||new Date),f.value=``):u.value=Xa(r||new Date);let m=()=>{let e=l.value===`concluido`;p.style.display=e?`block`:`none`,u?u.previousElementSibling.textContent=e?`Data e horario do servico`:`Data e horario do agendamento`:d.previousElementSibling.textContent=e?`Data do servico`:`Data do agendamento`};l.onchange=m,m(),document.getElementById(`f-client-service`).onsubmit=async t=>{t.preventDefault();let n=Number(document.getElementById(`s-equipamento`).value)||null,r=document.getElementById(`s-status`).value,a=document.getElementById(`s-tipo`).value,o=document.getElementById(`s-desc`).value.trim(),s=i?new Date(`${document.getElementById(`s-agendada-data`).value}T${document.getElementById(`s-agendada-hora`).value}`):new Date(document.getElementById(`s-agendada`).value),c=document.getElementById(`s-proxima`).value,l=c?new Date(c):null,u=document.getElementById(`s-tecnico`)?.value;await G.manutencoes.add({clientId:e,equipamentoId:n,status:r,dataAgendada:s,dataRealizada:r===`concluido`?s:null,tipoServico:a,descricao:o?`${a}: ${o}`:a,proximaData:l,valor:Number(document.getElementById(`s-valor`).value||0),formaPagamento:document.getElementById(`s-pagamento`).value,tecnicoId:u?Number(u):null}),r===`concluido`&&n&&l?await G.equipamentos.update(n,{ultimaManutencao:s,proximaManutencao:l}):r===`concluido`&&n&&await G.equipamentos.update(n,{ultimaManutencao:s}),await lo(e)}}async function fo(e){let t=await G.manutencoes.get(e);if(!t)return;let n=await G.clientes.get(t.clientId),r=await G.equipamentos.where(`clienteId`).equals(t.clientId).toArray(),i=Y.isAdmin()&&Y.getBusinessMode()===`empresa`,a=i?Y.getUsers().filter(e=>e.role===`tecnico`):[];q(`Fechar - ${n?.nome||`Serviço`}`),K.innerHTML=`
+  `;let l=document.getElementById(`s-status`),u=document.getElementById(`s-agendada`),d=document.getElementById(`s-agendada-data`),f=document.getElementById(`s-agendada-hora`),p=document.getElementById(`s-proxima-wrap`);i?(d.value=$a(r||new Date),f.value=``):u.value=Qa(r||new Date);let m=()=>{let e=l.value===`concluido`;p.style.display=e?`block`:`none`,u?u.previousElementSibling.textContent=e?`Data e horario do servico`:`Data e horario do agendamento`:d.previousElementSibling.textContent=e?`Data do servico`:`Data do agendamento`};l.onchange=m,m(),document.getElementById(`f-client-service`).onsubmit=async t=>{t.preventDefault();let n=Number(document.getElementById(`s-equipamento`).value)||null,r=document.getElementById(`s-status`).value,a=document.getElementById(`s-tipo`).value,o=document.getElementById(`s-desc`).value.trim(),s=i?new Date(`${document.getElementById(`s-agendada-data`).value}T${document.getElementById(`s-agendada-hora`).value}`):new Date(document.getElementById(`s-agendada`).value),c=document.getElementById(`s-proxima`).value,l=c?new Date(c):null,u=document.getElementById(`s-tecnico`)?.value;await G.manutencoes.add({clientId:e,equipamentoId:n,status:r,dataAgendada:s,dataRealizada:r===`concluido`?s:null,tipoServico:a,descricao:o?`${a}: ${o}`:a,proximaData:l,valor:Number(document.getElementById(`s-valor`).value||0),formaPagamento:document.getElementById(`s-pagamento`).value,tecnicoId:u?Number(u):null}),r===`concluido`&&n&&l?await G.equipamentos.update(n,{ultimaManutencao:s,proximaManutencao:l}):r===`concluido`&&n&&await G.equipamentos.update(n,{ultimaManutencao:s}),await fo(e)}}async function mo(e){let t=await G.manutencoes.get(e);if(!t)return;let n=await G.clientes.get(t.clientId),r=await G.equipamentos.where(`clienteId`).equals(t.clientId).toArray(),i=Y.isAdmin()&&Y.getBusinessMode()===`empresa`,a=i?Y.getUsers().filter(e=>e.role===`tecnico`):[];q(`Fechar - ${n?.nome||`Serviço`}`),K.innerHTML=`
     <form id="f-close-service">
       <div class="form-group">
         <label>Tipo de Serviço</label>
@@ -536,7 +536,7 @@ ${t?t+`: `:``}        </textarea>
       </div>
       <div class="form-group">
         <label>Data realizada</label>
-        <input type="datetime-local" id="cs-realizada" class="form-control" value="${Xa()}" required>
+        <input type="datetime-local" id="cs-realizada" class="form-control" value="${Qa()}" required>
       </div>
       <div class="form-group">
         <label>Próxima manutenção desse equipamento</label>
@@ -569,7 +569,7 @@ ${t?t+`: `:``}        </textarea>
       `:``}
       <button type="submit" class="btn-primary">FECHAR SERVIÇO</button>
     </form>
-  `,document.getElementById(`f-close-service`).onsubmit=async n=>{n.preventDefault();let r=Number(document.getElementById(`cs-equipamento`).value),i=new Date(document.getElementById(`cs-realizada`).value),a=new Date(document.getElementById(`cs-proxima`).value),o=document.getElementById(`cs-tecnico`)?.value;await G.manutencoes.update(e,{status:`concluido`,equipamentoId:r,dataRealizada:i,proximaData:a,valor:Number(document.getElementById(`cs-valor`).value||0),formaPagamento:document.getElementById(`cs-pagamento`).value,descricao:document.getElementById(`cs-desc`).value,tecnicoId:o?Number(o):t.tecnicoId||null}),await G.equipamentos.update(r,{ultimaManutencao:i,proximaManutencao:a}),await lo(t.clientId)}}async function po(e,t=null){let n=!!t,r=await G.clientes.get(e),i=n?await G.equipamentos.get(t):null;q(`${n?`Editar`:`Novo`} Equipamento`),K.innerHTML=`
+  `,document.getElementById(`f-close-service`).onsubmit=async n=>{n.preventDefault();let r=Number(document.getElementById(`cs-equipamento`).value),i=new Date(document.getElementById(`cs-realizada`).value),a=new Date(document.getElementById(`cs-proxima`).value),o=document.getElementById(`cs-tecnico`)?.value;await G.manutencoes.update(e,{status:`concluido`,equipamentoId:r,dataRealizada:i,proximaData:a,valor:Number(document.getElementById(`cs-valor`).value||0),formaPagamento:document.getElementById(`cs-pagamento`).value,descricao:document.getElementById(`cs-desc`).value,tecnicoId:o?Number(o):t.tecnicoId||null}),await G.equipamentos.update(r,{ultimaManutencao:i,proximaManutencao:a}),await fo(t.clientId)}}async function ho(e,t=null){let n=!!t,r=await G.clientes.get(e),i=n?await G.equipamentos.get(t):null;q(`${n?`Editar`:`Novo`} Equipamento`),K.innerHTML=`
     <form id="f-equipment">
       <div class="form-group">
         <label>Cliente</label>
@@ -595,11 +595,11 @@ ${t?t+`: `:``}        </textarea>
       </div>
       <div class="form-group">
         <label>Próxima manutenção</label>
-        <input type="datetime-local" id="e-proxima" class="form-control" value="${i?.proximaManutencao?Xa(i.proximaManutencao):``}">
+        <input type="datetime-local" id="e-proxima" class="form-control" value="${i?.proximaManutencao?Qa(i.proximaManutencao):``}">
       </div>
       <button type="submit" class="btn-primary">${n?`SALVAR EQUIPAMENTO`:`ADICIONAR EQUIPAMENTO`}</button>
     </form>
-  `,document.getElementById(`f-equipment`).onsubmit=async r=>{r.preventDefault();let i=document.getElementById(`e-proxima`).value,a={clienteId:e,marca:document.getElementById(`e-marca`).value,btu:Number(document.getElementById(`e-btu`).value),localizacao:document.getElementById(`e-local`).value,proximaManutencao:i?new Date(i):null};n?await G.equipamentos.update(t,a):await G.equipamentos.add({...a,ultimaManutencao:null}),await lo(e)}}async function mo(){return ho()}async function ho(e=null,t=null){let n=!!e,r=n?await G.clientes.get(e):null,i=!n&&!!t;q(n?`Editar Cliente`:`Novo Cliente`),K.innerHTML=`
+  `,document.getElementById(`f-equipment`).onsubmit=async r=>{r.preventDefault();let i=document.getElementById(`e-proxima`).value,a={clienteId:e,marca:document.getElementById(`e-marca`).value,btu:Number(document.getElementById(`e-btu`).value),localizacao:document.getElementById(`e-local`).value,proximaManutencao:i?new Date(i):null};n?await G.equipamentos.update(t,a):await G.equipamentos.add({...a,ultimaManutencao:null}),await fo(e)}}async function go(){return _o()}async function _o(e=null,t=null){let n=!!e,r=n?await G.clientes.get(e):null,i=!n&&!!t;q(n?`Editar Cliente`:`Novo Cliente`),K.innerHTML=`
     <form id="f-client">
       <div class="form-group">
         <label>Nome do Cliente</label>
@@ -608,7 +608,7 @@ ${t?t+`: `:``}        </textarea>
       <div class="form-group">
         <label>Tipo</label>
         <select id="c-tipo" class="form-control">
-          ${Ja.map(e=>`<option value="${e}" ${r?.tipo===e?`selected`:``}>${e}</option>`).join(``)}
+          ${Xa.map(e=>`<option value="${e}" ${r?.tipo===e?`selected`:``}>${e}</option>`).join(``)}
         </select>
       </div>
       <div class="form-group">
@@ -651,7 +651,7 @@ ${t?t+`: `:``}        </textarea>
       ${i?`
         <div style="background:rgba(14,165,233,0.12); border:1px solid rgba(14,165,233,0.35); border-radius:8px; padding:12px; margin-bottom:14px;">
           <label style="font-size:9px; opacity:0.75; font-weight:800;">AGENDAMENTO</label>
-          <p style="margin:6px 0 0 0; font-size:12px;">Data selecionada: ${Qa(t)}</p>
+          <p style="margin:6px 0 0 0; font-size:12px;">Data selecionada: ${eo(t)}</p>
           <p style="margin:4px 0 0 0; font-size:10px; opacity:0.65;">Depois de salvar o cliente, informe apenas o horario do servico.</p>
         </div>
       `:``}
@@ -684,55 +684,56 @@ ${t?t+`: `:``}        </textarea>
 
       <button type="submit" class="btn-primary" style="margin-top:15px;">${n?`SALVAR ALTERACOES`:`SALVAR CLIENTE`}</button>
     </form>
-  `,document.getElementById(`f-client`).onsubmit=async r=>{r.preventDefault();try{let r={logradouro:document.getElementById(`c-logradouro`).value,numero:document.getElementById(`c-numero`).value,complemento:document.getElementById(`c-complemento`).value,bairroEndereco:document.getElementById(`c-bairro-endereco`).value,cidade:document.getElementById(`c-cidade`).value,estado:document.getElementById(`c-estado`).value.toUpperCase(),cep:document.getElementById(`c-cep`).value},a={nome:document.getElementById(`c-nome`).value,...r,endereco:to(r),tipo:document.getElementById(`c-tipo`).value,grupo:``,telefone:``,whatsapp:document.getElementById(`c-whats`).value};if(n){await G.clientes.update(e,a),await lo(e);return}let o=await G.clientes.add({...a}),s=document.getElementById(`c-marca`).value,c=null;if(s&&(c=await G.equipamentos.add({clienteId:o,marca:s,btu:Number(document.getElementById(`c-btu`).value),localizacao:document.getElementById(`c-local`).value,ultimaManutencao:null,proximaManutencao:null})),i){await uo(o,`agendado`,c,t,!0);return}location.reload()}catch(e){alert(`Erro ao salvar cliente: `+e.message)}}}async function go(){let e=Ra();q(`Importar da Agenda`),K.innerHTML=`
+  `,document.getElementById(`f-client`).onsubmit=async r=>{r.preventDefault();try{let r={logradouro:document.getElementById(`c-logradouro`).value,numero:document.getElementById(`c-numero`).value,complemento:document.getElementById(`c-complemento`).value,bairroEndereco:document.getElementById(`c-bairro-endereco`).value,cidade:document.getElementById(`c-cidade`).value,estado:document.getElementById(`c-estado`).value.toUpperCase(),cep:document.getElementById(`c-cep`).value},a={nome:document.getElementById(`c-nome`).value,...r,endereco:ro(r),tipo:document.getElementById(`c-tipo`).value,grupo:``,telefone:``,whatsapp:document.getElementById(`c-whats`).value};if(n){await G.clientes.update(e,a),await fo(e);return}let o=await G.clientes.add({...a}),s=document.getElementById(`c-marca`).value,c=null;if(s&&(c=await G.equipamentos.add({clienteId:o,marca:s,btu:Number(document.getElementById(`c-btu`).value),localizacao:document.getElementById(`c-local`).value,ultimaManutencao:null,proximaManutencao:null})),i){await po(o,`agendado`,c,t,!0);return}location.reload()}catch(e){alert(`Erro ao salvar cliente: `+e.message)}}}async function vo(){let e=Ra();q(`Importar da Agenda`),K.innerHTML=`
     <form id="f-contact-import">
       <div class="form-group">
         <label>Tipo</label>
         <select id="ci-tipo" class="form-control">
-          ${Ja.map(e=>`<option value="${e}">${e}</option>`).join(``)}
+          ${Xa.map(e=>`<option value="${e}">${e}</option>`).join(``)}
         </select>
       </div>
 
-      <button type="button" id="ci-picker" class="btn-primary" style="background:#22c55e; margin-top:10px; ${e?``:`opacity:0.45;`}" ${e?``:`disabled`}>
-        SELECIONAR CONTATOS DO CELULAR
+      <button type="button" id="ci-picker" class="btn-primary" style="background:#22c55e; margin-top:10px;">
+        ${e?`SELECIONAR CONTATOS DO CELULAR`:`IMPORTAR AGENDA (.VCF/.CSV)`}
       </button>
+      <p style="font-size:10px; opacity:0.58; line-height:1.45; margin:8px 0 0 0;">
+        ${e?`Quando disponível, o navegador abre a agenda do celular para seleção direta.`:za()}
+      </p>
 
-      <div style="margin:16px 0; text-align:center; font-size:10px; opacity:0.5; font-weight:800;">OU</div>
-
-      <div class="form-group">
-        <label>Importar arquivo .vcf ou .csv</label>
+      <div class="form-group" style="margin-top:16px;">
+        <label>Arquivo .vcf ou .csv</label>
         <input type="file" id="ci-file" class="form-control" accept=".vcf,.csv,text/vcard,text/csv">
       </div>
       <button type="button" id="ci-file-btn" class="btn-primary" style="background:#0ea5e9; margin-top:10px;">
         IMPORTAR ARQUIVO
       </button>
     </form>
-  `;let t=async e=>{let t=document.getElementById(`ci-tipo`).value,n=e.map(Ka).filter(e=>e.name&&e.phone);if(n.length===0){alert(`Nenhum contato valido encontrado.`);return}let r=0;for(let e of n)await G.clientes.filter(t=>{let n=String(t.whatsapp||``).replace(/[^\d+]/g,``);return n&&n===e.phone}).first()||(await G.clientes.add({nome:e.name,endereco:``,tipo:t,grupo:``,telefone:``,whatsapp:e.phone}),r+=1);alert(`${r} contato(s) importado(s).`),location.reload()},n=document.getElementById(`ci-picker`);n&&(n.onclick=async()=>{try{await t(await za())}catch(e){alert(e.message)}}),document.getElementById(`ci-file-btn`).onclick=async()=>{let e=document.getElementById(`ci-file`).files[0];if(!e){alert(`Selecione um arquivo .vcf ou .csv.`);return}try{await t(await Ba(e))}catch(e){alert(`Erro ao importar contatos: `+e.message)}}}function _o(e){return e?new Date(e).toLocaleString(`pt-BR`,{day:`2-digit`,month:`2-digit`,year:`numeric`,hour:`2-digit`,minute:`2-digit`}):`---`}async function vo(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">HISTÓRICO</h2>`;let n=Y.isAdmin(),r=await G.manutencoes.reverse().toArray(),i=`<div class="animate-in" style="display: flex; flex-direction: column; gap: 15px; padding: 0 20px;">`;if(r.length===0)i+=`<p style="text-align:center; opacity:0.3; padding:40px;">Sem registros.</p>`;else for(let e of r){let t=e.equipamentoId?await G.equipamentos.get(e.equipamentoId):null,r=e.clientId?await G.clientes.get(e.clientId):t?await G.clientes.get(t.clienteId):null,a=(e.tipoServico||(e.descricao&&e.descricao.includes(`Corretiva`)?`CORRETIVA`:`PREVENTIVA`)).toLowerCase().includes(`corretiva`),o=r?.whatsapp||``,s=n?`
+  `;let t=async e=>{let t=document.getElementById(`ci-tipo`).value,n=e.map(Ja).filter(e=>e.name&&e.phone);if(n.length===0){alert(`Nenhum contato valido encontrado.`);return}let r=0;for(let e of n)await G.clientes.filter(t=>{let n=String(t.whatsapp||``).replace(/[^\d+]/g,``);return n&&n===e.phone}).first()||(await G.clientes.add({nome:e.name,endereco:``,tipo:t,grupo:``,telefone:``,whatsapp:e.phone}),r+=1);alert(`${r} contato(s) importado(s).`),location.reload()},n=async()=>{let e=document.getElementById(`ci-file`).files[0];if(!e){alert(`Selecione um arquivo .vcf ou .csv.`);return}try{await t(await Va(e))}catch(e){alert(`Erro ao importar contatos: `+e.message)}},r=document.getElementById(`ci-picker`);r&&(r.onclick=async()=>{try{if(!e){document.getElementById(`ci-file`)?.click();return}await t(await Ba())}catch(e){alert(e.message)}});let i=document.getElementById(`ci-file`);i&&(i.onchange=()=>n()),document.getElementById(`ci-file-btn`).onclick=n}function yo(e){return e?new Date(e).toLocaleString(`pt-BR`,{day:`2-digit`,month:`2-digit`,year:`numeric`,hour:`2-digit`,minute:`2-digit`}):`---`}async function bo(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">HISTÓRICO</h2>`;let n=Y.isAdmin(),[r,i,a]=await Promise.all([G.manutencoes.toArray(),G.equipamentos.toArray(),G.clientes.toArray()]),o=new Map(i.map(e=>[e.id,e])),s=new Map(a.map(e=>[e.id,e])),c=r.sort((e,t)=>{let n=new Date(e.dataRealizada||e.dataAgendada||0).getTime();return new Date(t.dataRealizada||t.dataAgendada||0).getTime()-n}),l=`<div class="animate-in" style="display: flex; flex-direction: column; gap: 15px; padding: 0 20px;">`;if(c.length===0)l+=`<p style="text-align:center; opacity:0.3; padding:40px;">Sem registros.</p>`;else for(let e of c){let t=e.equipamentoId?o.get(e.equipamentoId):null,r=e.clientId?s.get(e.clientId):t?s.get(t.clienteId):null,i=(e.tipoServico||(e.descricao&&e.descricao.includes(`Corretiva`)?`CORRETIVA`:`PREVENTIVA`)).toLowerCase().includes(`corretiva`),a=r?.whatsapp||``,c=n?`
         <button onclick="window.gerarPDF(${e.id})" class="btn-primary" 
                 style="background:#ff3b30; color:white; padding:6px 12px; font-size:9px; 
                        margin:0; width:auto; border-radius:8px; display:flex; align-items:center; 
                        gap:4px; margin-right:8px;">
           <span class="material-symbols-rounded" style="font-size:12px;">picture_as_pdf</span> GERAR PDF
         </button>
-      `:``;if(o&&n){let n=encodeURIComponent(`*RECIBO DE SERVIÇO*\n\n*Cliente:* ${r?.nome}\n*Aparelho:* ${t?`${t.marca} - ${t.localizacao}`:`Serviço geral do cliente`}\n*Data:* ${_o(e.dataRealizada||e.dataAgendada)}\n*Serviço:* ${e.descricao}\n*Valor:* R$ ${Number(e.valor||0).toFixed(2)} (${e.formaPagamento||`N/A`})\n\nObrigado pela preferência!`);s+=`
-          <a href="https://wa.me/${o.replace(/\D/g,``)}?text=${n}" target="_blank" 
+      `:``;if(a&&n){let n=encodeURIComponent(`*RECIBO DE SERVIÇO*\n\n*Cliente:* ${r?.nome}\n*Aparelho:* ${t?`${t.marca} - ${t.localizacao}`:`Serviço geral do cliente`}\n*Data:* ${yo(e.dataRealizada||e.dataAgendada)}\n*Serviço:* ${e.descricao}\n*Valor:* R$ ${Number(e.valor||0).toFixed(2)} (${e.formaPagamento||`N/A`})\n\nObrigado pela preferência!`);c+=`
+          <a href="https://wa.me/${a.replace(/\D/g,``)}?text=${n}" target="_blank" 
              class="btn-primary" 
              style="background:#25D366; color:white; padding:6px 12px; font-size:9px; 
                     margin:0; width:auto; border-radius:8px; display:flex; align-items:center; 
                     gap:4px;">
             <span class="material-symbols-rounded" style="font-size:12px;">receipt_long</span> ENVIAR RECIBO
           </a>
-        `}let c=e.foto?`<img src="${e.foto}" style="width:100%; max-height:150px; object-fit:cover; border-radius:8px; margin-top:12px; border: 1px solid rgba(255,255,255,0.1);">`:``;i+=`
-        <div class="card" style="border-left: 5px solid ${a?`#ff9d00`:`#22c55e`}; margin:0;">
+        `}let u=e.foto?`<img src="${e.foto}" style="width:100%; max-height:150px; object-fit:cover; border-radius:8px; margin-top:12px; border: 1px solid rgba(255,255,255,0.1);">`:``;l+=`
+        <div class="card" style="border-left: 5px solid ${i?`#ff9d00`:`#22c55e`}; margin:0;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <span style="font-size: 8px; font-weight: 900; padding: 4px 10px; border-radius: 40px; 
-                         background: rgba(255,255,255,0.05); color: ${a?`#ff9d00`:`#22c55e`}; 
-                         border: 1px solid ${a?`#ff9d00`:`#22c55e`}; text-transform:uppercase;">
-              ${e.tipoServico?e.tipoServico.toUpperCase():a?`CORRETIVA`:`PREVENTIVA`}
+                         background: rgba(255,255,255,0.05); color: ${i?`#ff9d00`:`#22c55e`}; 
+                         border: 1px solid ${i?`#ff9d00`:`#22c55e`}; text-transform:uppercase;">
+              ${e.tipoServico?e.tipoServico.toUpperCase():i?`CORRETIVA`:`PREVENTIVA`}
             </span>
             <div style="display:flex; align-items:center; gap:10px;">
               <span style="font-size: 10px; opacity: 0.5; font-weight:700;">
-                ${_o(e.dataRealizada||e.dataAgendada)}
+                ${yo(e.dataRealizada||e.dataAgendada)}
               </span>
               ${n?`<button class="icon-btn" style="border:none; padding:0; width:auto; height:auto;" 
                       onclick="window.deleteItem('manutencao', ${e.id})">
@@ -757,13 +758,13 @@ ${t?t+`: `:``}        </textarea>
           </p>
           ${t?`<p style="font-size:10px; opacity:0.55; margin-top:-6px;">${t.marca} • ${t.localizacao||`Local não informado`}</p>`:`<p style="font-size:10px; opacity:0.55; margin-top:-6px;">Serviço geral do cliente</p>`}
           
-          ${c}
+          ${u}
           
           ${n?`<div style="display:flex; justify-content:flex-end; margin-top:12px; gap:8px; flex-wrap:wrap;">
-            ${s}
+            ${c}
           </div>`:``}
         </div>
-      `}e.innerHTML=i+`</div>`}async function yo(e){let t=await G.manutencoes.get(e),n=t.equipamentoId?await G.equipamentos.get(t.equipamentoId):null,r=t.clientId?await G.clientes.get(t.clientId):n?await G.clientes.get(n.clienteId):null,i=n?.unidadeId?await G.unidades?.get(n.unidadeId):null,a=Y.getTechnicianData();await _a.generateReceipt(t,n,r,i,a)}async function bo(e){let t=await G.equipamentos.get(e),n=await G.clientes.get(t.clienteId),r=await G.manutencoes.where(`equipamentoId`).equals(e).toArray(),i=document.getElementById(`modal-overlay`),a=document.getElementById(`modal-title`),o=document.getElementById(`modal-body`);a&&(a.textContent=`${t.marca} - ${t.localizacao}`),i&&i.classList.add(`active`);let s=`
+      `}e.innerHTML=l+`</div>`}async function xo(e){let t=await G.manutencoes.get(e),n=t.equipamentoId?await G.equipamentos.get(t.equipamentoId):null,r=t.clientId?await G.clientes.get(t.clientId):n?await G.clientes.get(n.clienteId):null,i=n?.unidadeId?await G.unidades?.get(n.unidadeId):null,a=Y.getTechnicianData();await _a.generateReceipt(t,n,r,i,a)}async function So(e){let t=await G.equipamentos.get(e),n=await G.clientes.get(t.clienteId),r=await G.manutencoes.where(`equipamentoId`).equals(e).toArray(),i=document.getElementById(`modal-overlay`),a=document.getElementById(`modal-title`),o=document.getElementById(`modal-body`);a&&(a.textContent=`${t.marca} - ${t.localizacao}`),i&&i.classList.add(`active`);let s=`
     <div style="margin-bottom:15px; background:rgba(255,255,255,0.05); padding:12px; border-radius:8px;">
       <p style="margin:0; font-size:11px; opacity:0.6;">CLIENTE</p>
       <p style="margin:4px 0 0 0; font-size:13px; font-weight:700;">${n.nome}</p>
@@ -783,13 +784,13 @@ ${t?t+`: `:``}        </textarea>
       <div style="flex:1; background:rgba(255,255,255,0.05); padding:12px; border-radius:8px;">
         <p style="margin:0; font-size:9px; opacity:0.6;">ÚLTIMA MANUTENÇÃO</p>
         <p style="margin:4px 0 0 0; font-size:11px; font-weight:700;">
-          ${t.ultimaManutencao?_o(t.ultimaManutencao):`---`}
+          ${t.ultimaManutencao?yo(t.ultimaManutencao):`---`}
         </p>
       </div>
       <div style="flex:1; background:rgba(255,255,255,0.05); padding:12px; border-radius:8px;">
         <p style="margin:0; font-size:9px; opacity:0.6;">PRÓXIMA MANUTENÇÃO</p>
         <p style="margin:4px 0 0 0; font-size:11px; font-weight:700; color:var(--primary);">
-          ${t.proximaManutencao?_o(t.proximaManutencao):`---`}
+          ${t.proximaManutencao?yo(t.proximaManutencao):`---`}
         </p>
       </div>
     </div>
@@ -803,7 +804,7 @@ ${t?t+`: `:``}        </textarea>
         <div style="background:rgba(0,0,0,0.2); padding:10px; border-left:3px solid ${e.descricao.includes(`Corretiva`)?`#ff9d00`:`#22c55e`}; border-radius:6px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
             <span style="font-size:9px; font-weight:700;">
-              ${_o(e.dataRealizada||e.dataAgendada)}
+              ${yo(e.dataRealizada||e.dataAgendada)}
             </span>
             <span style="font-size:8px; font-weight:700; color:${e.descricao.includes(`Corretiva`)?`#ff9d00`:`#22c55e`};">
               ${e.descricao.includes(`Corretiva`)?`CORRETIVA`:`PREVENTIVA`}
@@ -814,7 +815,7 @@ ${t?t+`: `:``}        </textarea>
         </div>
       `).join(``):`<p style="font-size:10px; opacity:0.5;">Nenhuma manutenção registrada</p>`}
     </div>
-  `;o&&(o.innerHTML=s)}async function xo(e,t=200,n=.75){return new Promise(r=>{let i=new Image,a=URL.createObjectURL(e);i.onload=()=>{let e=Math.min(t/i.width,t/i.height,1),o=document.createElement(`canvas`);o.width=Math.round(i.width*e),o.height=Math.round(i.height*e),o.getContext(`2d`).drawImage(i,0,0,o.width,o.height),URL.revokeObjectURL(a),r(o.toDataURL(`image/jpeg`,n))},i.src=a})}async function So(e,t){let n=Y.getTechnicianData(),r=Y.isAdmin(),i=Y.getBusinessMode()===`empresa`,a=Y.getUsers().filter(e=>e.role===`tecnico`),o=Y.getNotificationsEnabled(),s=Y.getPlan()===`premium`;t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">AJUSTES</h2>`,e.innerHTML=`
+  `;o&&(o.innerHTML=s)}async function Co(e,t=200,n=.75){return new Promise(r=>{let i=new Image,a=URL.createObjectURL(e);i.onload=()=>{let e=Math.min(t/i.width,t/i.height,1),o=document.createElement(`canvas`);o.width=Math.round(i.width*e),o.height=Math.round(i.height*e),o.getContext(`2d`).drawImage(i,0,0,o.width,o.height),URL.revokeObjectURL(a),r(o.toDataURL(`image/jpeg`,n))},i.src=a})}async function wo(e,t){let n=Y.getTechnicianData(),r=Y.isAdmin(),i=Y.getBusinessMode()===`empresa`,a=Y.getUsers().filter(e=>e.role===`tecnico`),o=Y.getNotificationsEnabled(),s=Y.getPlan()===`premium`;t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">AJUSTES</h2>`,e.innerHTML=`
     <div class="animate-in" style="display:flex; flex-direction:column; gap:20px; padding:0 20px;">
 
       <!-- PERFIL -->
@@ -1007,7 +1008,7 @@ ${t?t+`: `:``}        </textarea>
       </div>
 
     </div>
-  `;let c=document.getElementById(`profile-photo-input`);c&&(c.onchange=async e=>{let t=e.target.files[0];if(!t)return;let n=await xo(t);Y.setTechnicianData(null,null,n),document.getElementById(`profile-photo-preview`).src=n;let r=document.querySelector(`.user-profile img`);r&&(r.src=n)});let l=document.getElementById(`toggle-notif`);l&&(l.onchange=()=>{let e=l.checked;Y.setNotificationsEnabled(e);let t=document.getElementById(`toggle-notif-track`);t&&(t.style.background=e?`var(--primary)`:`rgba(255,255,255,0.15)`,t.querySelector(`span`).style.left=e?`23px`:`3px`)})}function Co(){let e=Y.getTechnicianData();q(`Editar Perfil`),K.innerHTML=`
+  `;let c=document.getElementById(`profile-photo-input`);c&&(c.onchange=async e=>{let t=e.target.files[0];if(!t)return;let n=await Co(t);Y.setTechnicianData(null,null,n),document.getElementById(`profile-photo-preview`).src=n;let r=document.querySelector(`.user-profile img`);r&&(r.src=n)});let l=document.getElementById(`toggle-notif`);l&&(l.onchange=()=>{let e=l.checked;Y.setNotificationsEnabled(e);let t=document.getElementById(`toggle-notif-track`);t&&(t.style.background=e?`var(--primary)`:`rgba(255,255,255,0.15)`,t.querySelector(`span`).style.left=e?`23px`:`3px`)})}function To(){let e=Y.getTechnicianData();q(`Editar Perfil`),K.innerHTML=`
     <form id="f-edit-profile">
       <div class="form-group">
         <label>Nome</label>
@@ -1019,7 +1020,7 @@ ${t?t+`: `:``}        </textarea>
       </div>
       <button type="submit" class="btn-primary">SALVAR ALTERAÇÕES</button>
     </form>
-  `,document.getElementById(`f-edit-profile`).onsubmit=e=>{e.preventDefault();try{let e=document.getElementById(`ep-name`).value,t=document.getElementById(`ep-login`).value;Y.updateProfile(e,t),sa(),location.reload()}catch(e){alert(e.message)}}}function wo(){q(`Alterar Senha`),K.innerHTML=`
+  `,document.getElementById(`f-edit-profile`).onsubmit=e=>{e.preventDefault();try{let e=document.getElementById(`ep-name`).value,t=document.getElementById(`ep-login`).value;Y.updateProfile(e,t),sa(),location.reload()}catch(e){alert(e.message)}}}function Eo(){q(`Alterar Senha`),K.innerHTML=`
     <form id="f-change-password">
       <div class="form-group">
         <label>Senha atual</label>
@@ -1035,7 +1036,7 @@ ${t?t+`: `:``}        </textarea>
       </div>
       <button type="submit" class="btn-primary">ALTERAR SENHA</button>
     </form>
-  `,document.getElementById(`f-change-password`).onsubmit=e=>{e.preventDefault();let t=document.getElementById(`cp-current`).value,n=document.getElementById(`cp-new`).value;if(n!==document.getElementById(`cp-confirm`).value){alert(`As senhas não coincidem.`);return}try{Y.changePassword(t,n),sa(),alert(`Senha alterada com sucesso!`)}catch(e){alert(e.message)}}}function To(){if(!Y.isAdmin()||Y.getBusinessMode()!==`empresa`){alert(`Apenas o administrativo de empresa pode cadastrar funcionários.`);return}q(`Novo Funcionário`),K.innerHTML=`
+  `,document.getElementById(`f-change-password`).onsubmit=e=>{e.preventDefault();let t=document.getElementById(`cp-current`).value,n=document.getElementById(`cp-new`).value;if(n!==document.getElementById(`cp-confirm`).value){alert(`As senhas não coincidem.`);return}try{Y.changePassword(t,n),sa(),alert(`Senha alterada com sucesso!`)}catch(e){alert(e.message)}}}function Do(){if(!Y.isAdmin()||Y.getBusinessMode()!==`empresa`){alert(`Apenas o administrativo de empresa pode cadastrar funcionários.`);return}q(`Novo Funcionário`),K.innerHTML=`
     <form id="f-technician">
       <div class="form-group">
         <label>Nome do funcionário</label>
@@ -1056,7 +1057,7 @@ ${t?t+`: `:``}        </textarea>
       </div>
       <button type="submit" class="btn-primary">CADASTRAR FUNCIONÁRIO</button>
     </form>
-  `,document.getElementById(`f-technician`).onsubmit=e=>{e.preventDefault();try{Y.createTechnician({name:document.getElementById(`t-name`).value,login:document.getElementById(`t-login`).value,password:document.getElementById(`t-password`).value}),sa(),alert(`Funcionário cadastrado com sucesso.`),location.reload()}catch(e){alert(e.message)}}}async function Eo(){try{let e=await ea(),t=new Blob([e],{type:`application/json`}),n=URL.createObjectURL(t),r=document.createElement(`a`);r.href=n,r.download=`backup-ar-jampa-${new Date().toISOString().split(`T`)[0]}.json`,document.body.appendChild(r),r.click(),document.body.removeChild(r),URL.revokeObjectURL(n),alert(`Backup realizado com sucesso!`)}catch(e){alert(`Erro ao fazer backup: `+e.message)}}async function Do(){q(`Restaurar Backup`),K.innerHTML=`
+  `,document.getElementById(`f-technician`).onsubmit=e=>{e.preventDefault();try{Y.createTechnician({name:document.getElementById(`t-name`).value,login:document.getElementById(`t-login`).value,password:document.getElementById(`t-password`).value}),sa(),alert(`Funcionário cadastrado com sucesso.`),location.reload()}catch(e){alert(e.message)}}}async function Oo(){try{let e=await ea(),t=new Blob([e],{type:`application/json`}),n=URL.createObjectURL(t),r=document.createElement(`a`);r.href=n,r.download=`backup-ar-jampa-${new Date().toISOString().split(`T`)[0]}.json`,document.body.appendChild(r),r.click(),document.body.removeChild(r),URL.revokeObjectURL(n),alert(`Backup realizado com sucesso!`)}catch(e){alert(`Erro ao fazer backup: `+e.message)}}async function ko(){q(`Restaurar Backup`),K.innerHTML=`
     <form id="f-restore">
       <div class="form-group">
         <label>Selecione o arquivo de backup (.json)</label>
@@ -1067,10 +1068,10 @@ ${t?t+`: `:``}        </textarea>
       </p>
       <button type="submit" class="btn-primary" style="margin-top:15px;">RESTAURAR DADOS</button>
     </form>
-  `,document.getElementById(`f-restore`).onsubmit=async e=>{e.preventDefault();let t=document.getElementById(`r-file`);if(!t.files[0]){alert(`Selecione um arquivo de backup`);return}let n=await ta(await t.files[0].text());n.success?(alert(`Dados restaurados com sucesso! A página será recarregada.`),location.reload()):alert(`Erro ao restaurar dados: `+n.error)}}async function Oo(){if(confirm(`ATENÇÃO! Isto irá deletar TODOS os seus dados do aplicativo.
+  `,document.getElementById(`f-restore`).onsubmit=async e=>{e.preventDefault();let t=document.getElementById(`r-file`);if(!t.files[0]){alert(`Selecione um arquivo de backup`);return}let n=await ta(await t.files[0].text());n.success?(alert(`Dados restaurados com sucesso! A página será recarregada.`),location.reload()):alert(`Erro ao restaurar dados: `+n.error)}}async function Ao(){if(confirm(`ATENÇÃO! Isto irá deletar TODOS os seus dados do aplicativo.
 Clique em OK apenas se tem certeza disso.
 
-Esta ação NÃO pode ser desfeita!`)&&confirm(`Tem CERTEZA ABSOLUTA? Todos os seus clientes, equipamentos e manutenções serão permanentemente deletados!`))try{await G.clientes.clear(),await G.equipamentos.clear(),await G.unidades?.clear(),await G.manutencoes.clear(),await G.materiais?.clear(),await G.materiaisUsados?.clear(),await G.orcamentos?.clear(),await G.comunicacao?.clear(),alert(`Todos os dados foram deletados. A página será recarregada.`),location.reload()}catch(e){alert(`Erro ao limpar dados: `+e.message)}}async function ko(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">ORÇAMENTOS</h2>`,e.innerHTML=`
+Esta ação NÃO pode ser desfeita!`)&&confirm(`Tem CERTEZA ABSOLUTA? Todos os seus clientes, equipamentos e manutenções serão permanentemente deletados!`))try{await G.clientes.clear(),await G.equipamentos.clear(),await G.unidades?.clear(),await G.manutencoes.clear(),await G.materiais?.clear(),await G.materiaisUsados?.clear(),await G.orcamentos?.clear(),await G.comunicacao?.clear(),alert(`Todos os dados foram deletados. A página será recarregada.`),location.reload()}catch(e){alert(`Erro ao limpar dados: `+e.message)}}async function jo(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">ORÇAMENTOS</h2>`,e.innerHTML=`
     <div style="display:flex; align-items:center; justify-content:center; height:60vh; flex-direction:column; gap:20px; padding:20px;">
       <span class="material-symbols-rounded" style="font-size:60px; opacity:0.3;">build_circle</span>
       <h3 style="font-size:18px; margin:0;">Em Desenvolvimento</h3>
@@ -1078,7 +1079,7 @@ Esta ação NÃO pode ser desfeita!`)&&confirm(`Tem CERTEZA ABSOLUTA? Todos os s
         Módulo de gestão de orçamentos está sendo desenvolvido. Retorne em breve!
       </p>
     </div>
-  `}async function Ao(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">MATERIAIS</h2>`,e.innerHTML=`
+  `}async function Mo(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">MATERIAIS</h2>`,e.innerHTML=`
     <div style="display:flex; align-items:center; justify-content:center; height:60vh; flex-direction:column; gap:20px; padding:20px;">
       <span class="material-symbols-rounded" style="font-size:60px; opacity:0.3;">precision_manufacturing</span>
       <h3 style="font-size:18px; margin:0;">Em Desenvolvimento</h3>
@@ -1086,13 +1087,13 @@ Esta ação NÃO pode ser desfeita!`)&&confirm(`Tem CERTEZA ABSOLUTA? Todos os s
         Módulo de controle de materiais e peças está sendo desenvolvido. Retorne em breve!
       </p>
     </div>
-  `}function jo(e){return String(e||``).replace(/\D/g,``)}function Mo(e){return e?new Date(e).toLocaleString(`pt-BR`,{day:`2-digit`,month:`2-digit`,year:`numeric`,hour:`2-digit`,minute:`2-digit`}):`---`}function No(e){let t=new Date;t.setHours(0,0,0,0);let n=new Date(e);return n.setHours(0,0,0,0),Math.ceil((n-t)/864e5)}function Po(){let e=new Date().getHours();return e>=17&&e<18}function Fo(e){return No(e.dataAgendada)===1&&Po()}function Io(e){if(!e)return``;let t=[e.logradouro,e.numero].filter(Boolean).join(`, `),n=[e.cidade,e.estado].filter(Boolean).join(` - `);return[t,e.complemento,e.bairroEndereco,n,e.cep].filter(Boolean).join(`, `)||e.endereco||``}function Lo(e,t){let n=jo(e);if(!n){alert(`Cliente sem WhatsApp cadastrado.`);return}window.open(`https://wa.me/${n}?text=${encodeURIComponent(t)}`,`_blank`)}async function Ro(e,t,n){await G.comunicacao.add({clienteId:e,tipo:t,mensagem:n,data:new Date})}function zo(e){return`msg_done_${e.id}`}function Bo(e){return localStorage.getItem(zo(e))===`1`}async function Vo(){let e=await G.clientes.toArray(),t=await G.equipamentos.toArray(),n=await G.manutencoes.toArray(),r=t.filter(e=>e.proximaManutencao&&No(e.proximaManutencao)<0).map(t=>{let n=e.find(e=>e.id===t.clienteId),r=`Olá, ${n?.nome||`tudo bem`}! Identifiquei aqui que a manutenção do seu ar-condicionado (${t.marca} - ${t.localizacao||`local não informado`}) venceu em ${Mo(t.proximaManutencao)}. Podemos agendar uma visita?`;return{id:`vencida-${t.id}`,type:`vencida`,title:n?.nome||`Cliente`,subtitle:`${t.marca} - ${t.localizacao||`Local não informado`}`,date:t.proximaManutencao,phone:n?.whatsapp,clienteId:n?.id,message:r}}),i=n.filter(e=>e.status===`agendado`&&e.dataAgendada).filter(Fo).sort((e,t)=>new Date(e.dataAgendada)-new Date(t.dataAgendada)).map(n=>{let r=e.find(e=>e.id===n.clientId),i=t.find(e=>e.id===n.equipamentoId),a=Io(r),o=`Olá, ${r?.nome||`tudo bem`}! Passando para confirmar seu agendamento de ${n.tipoServico||`serviço`} para ${Mo(n.dataAgendada)}${i?` no equipamento ${i.marca} - ${i.localizacao||`local não informado`}`:``}${a?`, no endereço ${a}`:``}. Está confirmado?`;return{id:`agendada-${n.id}`,type:`agendada`,title:r?.nome||`Cliente`,subtitle:n.tipoServico||`Serviço agendado`,date:n.dataAgendada,phone:r?.whatsapp,clienteId:r?.id,message:o}});return{overdue:r.filter(e=>!Bo(e)),scheduled:i.filter(e=>!Bo(e))}}function Ho(e){let t=e.type===`vencida`?`#ef4444`:`#0ea5e9`;return`
+  `}function No(e){return String(e||``).replace(/\D/g,``)}function Po(e){return e?new Date(e).toLocaleString(`pt-BR`,{day:`2-digit`,month:`2-digit`,year:`numeric`,hour:`2-digit`,minute:`2-digit`}):`---`}function Fo(e){let t=new Date;t.setHours(0,0,0,0);let n=new Date(e);return n.setHours(0,0,0,0),Math.ceil((n-t)/864e5)}function Io(){let e=new Date().getHours();return e>=17&&e<18}function Lo(e){return Fo(e.dataAgendada)===1&&Io()}function Ro(e){if(!e)return``;let t=[e.logradouro,e.numero].filter(Boolean).join(`, `),n=[e.cidade,e.estado].filter(Boolean).join(` - `);return[t,e.complemento,e.bairroEndereco,n,e.cep].filter(Boolean).join(`, `)||e.endereco||``}function zo(e,t){let n=No(e);if(!n){alert(`Cliente sem WhatsApp cadastrado.`);return}window.open(`https://wa.me/${n}?text=${encodeURIComponent(t)}`,`_blank`)}async function Bo(e,t,n){await G.comunicacao.add({clienteId:e,tipo:t,mensagem:n,data:new Date})}function Vo(e){return`msg_done_${e.id}`}function Ho(e){return localStorage.getItem(Vo(e))===`1`}async function Uo(){let e=await G.clientes.toArray(),t=await G.equipamentos.toArray(),n=await G.manutencoes.toArray(),r=t.filter(e=>e.proximaManutencao&&Fo(e.proximaManutencao)<0).map(t=>{let n=e.find(e=>e.id===t.clienteId),r=`Olá, ${n?.nome||`tudo bem`}! Identifiquei aqui que a manutenção do seu ar-condicionado (${t.marca} - ${t.localizacao||`local não informado`}) venceu em ${Po(t.proximaManutencao)}. Podemos agendar uma visita?`;return{id:`vencida-${t.id}`,type:`vencida`,title:n?.nome||`Cliente`,subtitle:`${t.marca} - ${t.localizacao||`Local não informado`}`,date:t.proximaManutencao,phone:n?.whatsapp,clienteId:n?.id,message:r}}),i=n.filter(e=>e.status===`agendado`&&e.dataAgendada).filter(Lo).sort((e,t)=>new Date(e.dataAgendada)-new Date(t.dataAgendada)).map(n=>{let r=e.find(e=>e.id===n.clientId),i=t.find(e=>e.id===n.equipamentoId),a=Ro(r),o=`Olá, ${r?.nome||`tudo bem`}! Passando para confirmar seu agendamento de ${n.tipoServico||`serviço`} para ${Po(n.dataAgendada)}${i?` no equipamento ${i.marca} - ${i.localizacao||`local não informado`}`:``}${a?`, no endereço ${a}`:``}. Está confirmado?`;return{id:`agendada-${n.id}`,type:`agendada`,title:r?.nome||`Cliente`,subtitle:n.tipoServico||`Serviço agendado`,date:n.dataAgendada,phone:r?.whatsapp,clienteId:r?.id,message:o}});return{overdue:r.filter(e=>!Ho(e)),scheduled:i.filter(e=>!Ho(e))}}async function Wo(){let e=await Uo();return e.overdue.length>0||e.scheduled.length>0}function Go(e){let t=e.type===`vencida`?`#ef4444`:`#0ea5e9`;return`
     <div class="card" style="margin:0; padding:14px; border-left:5px solid ${t};">
       <div style="display:flex; justify-content:space-between; gap:10px;">
         <div style="min-width:0;">
           <p style="font-size:8px; font-weight:900; color:${t}; margin:0 0 5px 0;">${e.type===`vencida`?`MANUTENCAO VENCIDA`:`CONFIRMACAO DE AGENDAMENTO`}</p>
           <h3 style="font-size:14px; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${e.title}</h3>
-          <p style="font-size:10px; opacity:0.6; margin:5px 0 0 0;">${e.subtitle} • ${Mo(e.date)}</p>
+          <p style="font-size:10px; opacity:0.6; margin:5px 0 0 0;">${e.subtitle} • ${Po(e.date)}</p>
         </div>
       </div>
       <p style="font-size:11px; line-height:1.45; background:rgba(255,255,255,0.04); padding:10px; border-radius:8px; margin:12px 0 0 0;">${e.message}</p>
@@ -1102,7 +1103,7 @@ Esta ação NÃO pode ser desfeita!`)&&confirm(`Tem CERTEZA ABSOLUTA? Todos os s
         <button class="btn-primary" onclick="window.completeAutomationMessage('${e.id}')" style="margin-top:0; background:#22c55e; font-size:10px; padding:11px 8px;">CONCLUIDA</button>
       </div>
     </div>
-  `}async function Uo(){if(await G.clientes.filter(e=>String(e.nome||``).startsWith(`Teste Mensagem`)).count()>0){alert(`Dados de teste ja existem.`);return}let e=await G.clientes.add({nome:`Teste Mensagem Vencida`,tipo:`Pessoa Fisica`,logradouro:`Rua Teste Vencida`,numero:`100`,bairroEndereco:`Centro`,cidade:`Joao Pessoa`,estado:`PB`,cep:`58000-000`,endereco:`Rua Teste Vencida, 100, Centro, Joao Pessoa - PB, 58000-000`,telefone:``,whatsapp:`83999990001`});await G.equipamentos.add({clienteId:e,marca:`LG`,btu:12e3,localizacao:`Sala`,ultimaManutencao:new Date(Date.now()-1e3*60*60*24*220),proximaManutencao:new Date(Date.now()-1e3*60*60*24*3)});let t=await G.clientes.add({nome:`Teste Mensagem Agendada`,tipo:`Empresa`,logradouro:`Avenida Teste Agenda`,numero:`200`,bairroEndereco:`Manaira`,cidade:`Joao Pessoa`,estado:`PB`,cep:`58000-001`,endereco:`Avenida Teste Agenda, 200, Manaira, Joao Pessoa - PB, 58000-001`,telefone:``,whatsapp:`83999990002`}),n=await G.equipamentos.add({clienteId:t,marca:`Samsung`,btu:18e3,localizacao:`Recepcao`,ultimaManutencao:null,proximaManutencao:null});await G.manutencoes.add({clientId:t,equipamentoId:n,status:`agendado`,dataAgendada:new Date(Date.now()+1e3*60*60*24),dataRealizada:null,tipoServico:`Limpeza`,descricao:`Limpeza: teste de confirmacao automatica`,valor:150,formaPagamento:`PIX`}),alert(`Clientes de teste criados.`)}async function Wo(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">COMUNICACAO</h2>`;let n=await Vo(),r=[...n.overdue,...n.scheduled];window.__automationMessages=r,window.sendAutomationMessage=Go,window.copyAutomationMessage=Ko,window.completeAutomationMessage=async n=>{await qo(n),await Wo(e,t)},window.createMessageTestData=async()=>{await Uo(),await Wo(e,t)},e.innerHTML=`
+  `}async function Ko(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">COMUNICACAO</h2>`;let n=await Uo(),r=[...n.overdue,...n.scheduled];window.__automationMessages=r,window.sendAutomationMessage=qo,window.copyAutomationMessage=Jo,window.completeAutomationMessage=async n=>{await Yo(n),await Ko(e,t)},e.innerHTML=`
     <div class="animate-in" style="display:flex; flex-direction:column; gap:16px; padding:0 20px;">
       <div class="card" style="margin:0; padding:16px;">
         <h3 style="font-size:15px; margin:0;">Automacao de mensagens</h3>
@@ -1112,9 +1113,6 @@ Esta ação NÃO pode ser desfeita!`)&&confirm(`Tem CERTEZA ABSOLUTA? Todos os s
         <p style="font-size:11px; line-height:1.45; margin:10px 0 0 0; color:var(--primary); font-weight:800;">
           Breve integração com WhatsApp e automações de mensagens.
         </p>
-        <button class="btn-primary" onclick="window.createMessageTestData()" style="background:#8b5cf6; margin-top:12px;">
-          CRIAR DADOS DE TESTE
-        </button>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px;">
@@ -1128,14 +1126,14 @@ Esta ação NÃO pode ser desfeita!`)&&confirm(`Tem CERTEZA ABSOLUTA? Todos os s
         </div>
       </div>
 
-      ${r.length>0?r.map(Ho).join(``):`
+      ${r.length>0?r.map(Go).join(``):`
         <div style="text-align:center; padding:45px 10px; opacity:0.45;">
           <span class="material-symbols-rounded" style="font-size:44px; display:block; margin-bottom:10px;">mark_email_read</span>
           Nenhuma mensagem pendente.
         </div>
       `}
     </div>
-  `}async function Go(e){let t=window.__automationMessages?.find(t=>t.id===e);t&&(Lo(t.phone,t.message),t.clienteId&&await Ro(t.clienteId,t.type,t.message))}async function Ko(e){let t=window.__automationMessages?.find(t=>t.id===e);t&&(await navigator.clipboard.writeText(t.message),alert(`Mensagem copiada.`))}async function qo(e){let t=window.__automationMessages?.find(t=>t.id===e);t&&(localStorage.setItem(zo(t),`1`),t.clienteId&&await Ro(t.clienteId,`${t.type}_concluida`,t.message))}async function Jo(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">RELATÓRIOS</h2>`,e.innerHTML=`
+  `}async function qo(e){let t=window.__automationMessages?.find(t=>t.id===e);t&&(zo(t.phone,t.message),t.clienteId&&await Bo(t.clienteId,t.type,t.message))}async function Jo(e){let t=window.__automationMessages?.find(t=>t.id===e);t&&(await navigator.clipboard.writeText(t.message),alert(`Mensagem copiada.`))}async function Yo(e){let t=window.__automationMessages?.find(t=>t.id===e);t&&(localStorage.setItem(Vo(t),`1`),t.clienteId&&await Bo(t.clienteId,`${t.type}_concluida`,t.message))}async function Xo(e,t){t.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">RELATÓRIOS</h2>`,e.innerHTML=`
     <div style="display:flex; align-items:center; justify-content:center; height:60vh; flex-direction:column; gap:20px; padding:20px;">
       <span class="material-symbols-rounded" style="font-size:60px; opacity:0.3;">analytics</span>
       <h3 style="font-size:18px; margin:0;">Em Desenvolvimento</h3>
@@ -1143,7 +1141,7 @@ Esta ação NÃO pode ser desfeita!`)&&confirm(`Tem CERTEZA ABSOLUTA? Todos os s
         Módulo de relatórios e analytics está sendo desenvolvido. Retorne em breve!
       </p>
     </div>
-  `}var Q=document.getElementById(`main-content`),$=document.getElementById(`header-content`),Yo=document.querySelectorAll(`.nav-item`),Xo=document.getElementById(`splash-screen`),Zo=document.querySelector(`.app-container`);async function Qo(){try{if(oa(),rs(),await Y.init(),!Y.isAuthenticated()){ts(),$o();return}ma.start(),is(),as(),await cs(),Z(Q,$),setTimeout($o,1500),ls()}catch(e){console.error(`Erro na inicialização:`,e),$o()}}function $o(){Xo&&(Xo.style.opacity=`0`,Xo.style.pointerEvents=`none`)}function es(e){Zo&&(Zo.style.display=e?``:`none`)}function ts(e=`login`){es(!1),Y.hasUsers();let t=e===`cadastro`?`cadastro`:`login`,n=document.getElementById(`auth-screen`);n||(n=document.createElement(`div`),n.id=`auth-screen`,document.body.appendChild(n));let r=t===`cadastro`,i=Y.getTechnicianData().appName;n.innerHTML=`
+  `}var Q=document.getElementById(`main-content`),$=document.getElementById(`header-content`),Zo=document.querySelectorAll(`.nav-item`),Qo=document.getElementById(`splash-screen`),$o=document.querySelector(`.app-container`);async function es(){try{if(oa(),as(),await Y.init(),!Y.isAuthenticated()){rs(),ts();return}ma.start(),us(),ds(),await ps(),Z(Q,$),setTimeout(ts,1500),ms()}catch(e){console.error(`Erro na inicialização:`,e),ts()}}function ts(){Qo&&(Qo.style.opacity=`0`,Qo.style.pointerEvents=`none`)}function ns(e){$o&&($o.style.display=e?``:`none`)}function rs(e=`login`){ns(!1),Y.hasUsers();let t=e===`cadastro`?`cadastro`:`login`,n=document.getElementById(`auth-screen`);n||(n=document.createElement(`div`),n.id=`auth-screen`,document.body.appendChild(n));let r=t===`cadastro`,i=Y.getTechnicianData().appName;n.innerHTML=`
     <div class="auth-shell">
       <div class="auth-panel animate-in">
         <div class="auth-brand">
@@ -1190,4 +1188,12 @@ Esta ação NÃO pode ser desfeita!`)&&confirm(`Tem CERTEZA ABSOLUTA? Todos os s
         </button>
       </div>
     </div>
-  `,document.getElementById(`auth-form`).onsubmit=async e=>{e.preventDefault();try{r?await Y.register({name:document.getElementById(`auth-name`).value,email:document.getElementById(`auth-login`).value,password:document.getElementById(`auth-password`).value,businessMode:document.getElementById(`auth-business-mode`)?.value}):await Y.login(document.getElementById(`auth-login`).value,document.getElementById(`auth-password`).value),n.remove(),es(!0),await ns()}catch(e){alert(e.message)}};let a=document.getElementById(`auth-business-mode`);a&&(a.onchange=()=>{let e=document.getElementById(`auth-mode-help`);e.textContent=a.value===`empresa`?`Como empresa, este administrador poderá cadastrar técnicos com acesso limitado.`:`Como autônomo, este administrador terá acesso completo ao sistema.`})}async function ns(){ma.watchConnection(),is(),as(),await cs(),await Z(Q,$),ls()}function rs(){window.renderAuthScreen=ts,window.logoutApp=async()=>{await Y.logout(),sa(),es(!1),ts(`login`)}}function is(){Yo.forEach(e=>{e.onclick=async()=>{let t=e.dataset.view;if(Y.isEmployee()&&![`home`,`os`].includes(t)){Yo.forEach(e=>e.classList.remove(`active`)),document.querySelector(`.nav-item[data-view="home"]`)?.classList.add(`active`),await Z(Q,$);return}switch(Yo.forEach(e=>e.classList.remove(`active`)),e.classList.add(`active`),t){case`home`:Z(Q,$);break;case`bairros`:so(Q,$);break;case`os`:vo(Q,$);break;case`orcamentos`:ko(Q,$);break;case`materiais`:Ao(Q,$);break;case`comunicacao`:Wo(Q,$);break;case`relatorios`:Jo(Q,$);break;case`mais`:So(Q,$);break}await cs()}})}function as(){Yo.forEach(e=>{let t=e.dataset.view;e.style.display=Y.isEmployee()&&![`home`,`os`].includes(t)?`none`:``})}function os(e){let t=new Date;t.setHours(0,0,0,0);let n=new Date(e);return n.setHours(0,0,0,0),Math.ceil((n-t)/864e5)}async function ss(){let e=await G.equipamentos.toArray(),t=await G.manutencoes.toArray(),n=e.some(e=>e.proximaManutencao&&os(e.proximaManutencao)<0&&localStorage.getItem(`msg_done_vencida-${e.id}`)!==`1`),r=t.some(e=>e.status===`agendado`&&e.dataAgendada&&localStorage.getItem(`msg_done_agendada-${e.id}`)!==`1`);return n||r}async function cs(){let e=document.querySelector(`.nav-item[data-view="comunicacao"]`);e&&e.classList.toggle(`has-pending`,await ss())}function ls(){let e=()=>alert(`Acesso limitado: funcionário apenas visualiza agenda e serviços.`);window.renderMaintenanceForm=Y.isEmployee()?e:Ia,window.renderEquipmentHistory=bo,window.showNotifications=ka,window.setHomeFilter=Aa,window.showFinancialReport=Y.isEmployee()?e:La,window.renderNewServicePrompt=Y.isEmployee()?e:Na,window.renderNewServiceLaunch=Y.isEmployee()?e:Pa,window.gerarPDF=yo,window.renderBairroForm=Y.isEmployee()?e:mo,window.renderFullPropertyForm=Y.isEmployee()?e:ho,window.renderBairroDetail=Y.isEmployee()?e:co,window.renderClientDetail=Y.isEmployee()?e:lo,window.renderContactsImportForm=Y.isEmployee()?e:go,window.renderClientServiceForm=Y.isEmployee()?e:uo,window.renderCloseScheduledServiceForm=Y.isEmployee()?e:fo,window.renderEquipmentForm=Y.isEmployee()?e:po,window.renderTechnicianForm=To,window.exportarDados=Eo,window.restaurarDados=Do,window.limparTodosDados=Oo,window.renderEditProfileForm=Co,window.renderChangePasswordForm=wo,window.deleteItem=us,window.renderComunicacaoPage=()=>{Wo(Q,$)},window.renderDashboard=e=>{Z(Q,$,e)}}async function us(e,t){if(Y.isEmployee()){alert(`Acesso limitado: funcionário apenas visualiza agenda e serviços.`);return}if(confirm(`Tem certeza que deseja excluir este ${e}?`))try{switch(e){case`cliente`:await G.clientes.delete(t);break;case`equipamento`:await G.equipamentos.delete(t);break;case`unidade`:await G.unidades.delete(t);break;case`manutencao`:await G.manutencoes.delete(t);break}location.reload()}catch(e){console.error(`Erro ao deletar:`,e),alert(`Erro ao deletar item`)}}document.addEventListener(`DOMContentLoaded`,Qo);
+  `,document.getElementById(`auth-form`).onsubmit=async e=>{e.preventDefault();try{r?await Y.register({name:document.getElementById(`auth-name`).value,email:document.getElementById(`auth-login`).value,password:document.getElementById(`auth-password`).value,businessMode:document.getElementById(`auth-business-mode`)?.value}):await Y.login(document.getElementById(`auth-login`).value,document.getElementById(`auth-password`).value),n.remove(),ns(!0),await is()}catch(e){alert(e.message)}};let a=document.getElementById(`auth-business-mode`);a&&(a.onchange=()=>{let e=document.getElementById(`auth-mode-help`);e.textContent=a.value===`empresa`?`Como empresa, este administrador poderá cadastrar técnicos com acesso limitado.`:`Como autônomo, este administrador terá acesso completo ao sistema.`})}async function is(){ma.watchConnection(),us(),ds(),await ps(),await Z(Q,$),ms()}function as(){window.renderAuthScreen=rs,window.logoutApp=async()=>{await Y.logout(),sa(),ns(!1),rs(`login`)}}var os=0;function ss(e=`Carregando`){$.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">${e}</h2>`,Q.innerHTML=`
+    <div class="animate-in" style="display:flex; align-items:center; justify-content:center; min-height:45vh; padding:20px; opacity:0.55; font-size:12px; font-weight:800;">
+      Carregando...
+    </div>
+  `}async function cs(e){switch(e){case`home`:await Z(Q,$);break;case`bairros`:await lo(Q,$);break;case`os`:await bo(Q,$);break;case`orcamentos`:await jo(Q,$);break;case`materiais`:await Mo(Q,$);break;case`comunicacao`:await Ko(Q,$);break;case`relatorios`:await Xo(Q,$);break;case`mais`:await wo(Q,$);break}}function ls(e){return{home:`AGENDA`,bairros:`CLIENTES`,os:`HISTÓRICO`,orcamentos:`ORÇAMENTOS`,materiais:`MATERIAIS`,comunicacao:`COMUNICAÇÃO`,relatorios:`RELATÓRIOS`,mais:`MAIS`}[e]||`CARREGANDO`}function us(){Zo.forEach(e=>{e.onclick=async()=>{let t=e.dataset.view,n=e;Y.isEmployee()&&![`home`,`os`].includes(t)&&(t=`home`,n=document.querySelector(`.nav-item[data-view="home"]`)||e);let r=++os;Zo.forEach(e=>e.classList.remove(`active`)),n.classList.add(`active`),ss(ls(t));try{await cs(t)}catch(e){if(r!==os)return;console.error(`Erro ao renderizar view:`,e),$.innerHTML=`<h2 style="font-size: 20px; font-weight: 800; margin:0;">${ls(t)}</h2>`,Q.innerHTML=`
+          <div style="text-align:center; opacity:0.55; padding:40px 20px; font-size:12px; line-height:1.5;">
+            Não foi possível carregar esta tela.
+          </div>
+        `}ps().catch(e=>console.error(`Erro ao atualizar badge:`,e))}})}function ds(){Zo.forEach(e=>{let t=e.dataset.view;e.style.display=Y.isEmployee()&&![`home`,`os`].includes(t)?`none`:``})}async function fs(){return Wo()}async function ps(){let e=document.querySelector(`.nav-item[data-view="comunicacao"]`);e&&e.classList.toggle(`has-pending`,await fs())}function ms(){let e=()=>alert(`Acesso limitado: funcionário apenas visualiza agenda e serviços.`);window.renderMaintenanceForm=Y.isEmployee()?e:Ia,window.renderEquipmentHistory=So,window.showNotifications=ka,window.setHomeFilter=Aa,window.showFinancialReport=Y.isEmployee()?e:La,window.renderNewServicePrompt=Y.isEmployee()?e:Na,window.renderNewServiceLaunch=Y.isEmployee()?e:Pa,window.gerarPDF=xo,window.renderBairroForm=Y.isEmployee()?e:go,window.renderFullPropertyForm=Y.isEmployee()?e:_o,window.renderBairroDetail=Y.isEmployee()?e:uo,window.renderClientDetail=Y.isEmployee()?e:fo,window.renderContactsImportForm=Y.isEmployee()?e:vo,window.renderClientServiceForm=Y.isEmployee()?e:po,window.renderCloseScheduledServiceForm=Y.isEmployee()?e:mo,window.renderEquipmentForm=Y.isEmployee()?e:ho,window.renderTechnicianForm=Do,window.exportarDados=Oo,window.restaurarDados=ko,window.limparTodosDados=Ao,window.renderEditProfileForm=To,window.renderChangePasswordForm=Eo,window.deleteItem=hs,window.renderComunicacaoPage=()=>{Ko(Q,$)},window.renderDashboard=e=>{Z(Q,$,e)}}async function hs(e,t){if(Y.isEmployee()){alert(`Acesso limitado: funcionário apenas visualiza agenda e serviços.`);return}if(confirm(`Tem certeza que deseja excluir este ${e}?`))try{switch(e){case`cliente`:await G.clientes.delete(t);break;case`equipamento`:await G.equipamentos.delete(t);break;case`unidade`:await G.unidades.delete(t);break;case`manutencao`:await G.manutencoes.delete(t);break}location.reload()}catch(e){console.error(`Erro ao deletar:`,e),alert(`Erro ao deletar item`)}}document.addEventListener(`DOMContentLoaded`,es);
