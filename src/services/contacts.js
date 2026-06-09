@@ -1,10 +1,20 @@
 export function isContactPickerSupported() {
-  return 'contacts' in navigator && 'ContactsManager' in window;
+  return Boolean(window.isSecureContext && 'contacts' in navigator && 'ContactsManager' in window);
+}
+
+export function getContactPickerUnavailableReason() {
+  if (!window.isSecureContext) {
+    return 'A seleção direta de contatos só funciona em acesso seguro (HTTPS ou localhost). Use a importação por arquivo .vcf/.csv neste acesso.';
+  }
+  if (!('contacts' in navigator) || !('ContactsManager' in window)) {
+    return 'Este navegador não permite selecionar contatos diretamente. Exporte seus contatos como .vcf ou .csv e importe pelo arquivo.';
+  }
+  return 'A seleção direta de contatos não está disponível neste navegador. Use a importação por arquivo .vcf/.csv.';
 }
 
 export async function pickContactsFromDevice() {
   if (!isContactPickerSupported()) {
-    throw new Error('Contact Picker API não suportada neste navegador.');
+    throw new Error(getContactPickerUnavailableReason());
   }
 
   const availableProperties = await navigator.contacts.getProperties();
@@ -49,16 +59,17 @@ function readVCardField(card, field) {
 }
 
 function parseCSV(text) {
-  const lines = text.split(/\r?\n/).filter((line) => line.trim());
+  const lines = text.split(new RegExp('\\r?\\n')).filter((line) => line.trim());
   if (lines.length === 0) return [];
 
-  const headers = splitCSVLine(lines[0]).map((header) => header.trim().toLowerCase());
-  const nameIndex = findHeader(headers, ['nome', 'name', 'contato', 'contact']);
-  const phoneIndex = findHeader(headers, ['telefone', 'phone', 'tel', 'celular', 'whatsapp']);
+  const delimiter = detectCSVDelimiter(lines[0]);
+  const headers = splitCSVLine(lines[0], delimiter).map((header) => header.trim().toLowerCase());
+  const nameIndex = findHeader(headers, ['nome', 'name', 'contato', 'contact', 'nome completo', 'full name']);
+  const phoneIndex = findHeader(headers, ['telefone', 'phone', 'tel', 'celular', 'whatsapp', 'mobile', 'phone 1 - value']);
 
   return lines.slice(1)
     .map((line) => {
-      const columns = splitCSVLine(line);
+      const columns = splitCSVLine(line, delimiter);
       return normalizeContact({
         name: [columns[nameIndex] || columns[0]],
         tel: [columns[phoneIndex] || columns[1]]
@@ -67,15 +78,26 @@ function parseCSV(text) {
     .filter((contact) => contact.name && contact.phone);
 }
 
-function splitCSVLine(line) {
+function detectCSVDelimiter(headerLine) {
+  const candidates = [',', ';', '	'];
+  return candidates
+    .map((delimiter) => ({ delimiter, count: splitCSVLine(headerLine, delimiter).length }))
+    .sort((a, b) => b.count - a.count)[0].delimiter;
+}
+
+function splitCSVLine(line, delimiter = ',') {
   const result = [];
   let current = '';
   let quoted = false;
 
   for (let index = 0; index < line.length; index += 1) {
     const char = line[index];
-    if (char === '"') quoted = !quoted;
-    else if (char === ',' && !quoted) {
+    const next = line[index + 1];
+    if (char === '"' && quoted && next === '"') {
+      current += '"';
+      index += 1;
+    } else if (char === '"') quoted = !quoted;
+    else if (char === delimiter && !quoted) {
       result.push(current.trim());
       current = '';
     } else current += char;

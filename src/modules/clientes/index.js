@@ -5,7 +5,7 @@
 import { db } from '../../services/db.js';
 import { openModal, modalBody, CONSTANTS } from '../../services/ui.js';
 import { authService } from '../../services/auth.js';
-import { isContactPickerSupported, normalizeContact, parseContactsFile, pickContactsFromDevice } from '../../services/contacts.js';
+import { getContactPickerUnavailableReason, isContactPickerSupported, normalizeContact, parseContactsFile, pickContactsFromDevice } from '../../services/contacts.js';
 
 let currentClientFilter = 'todos';
 
@@ -806,14 +806,17 @@ export async function renderContactsImportForm() {
         </select>
       </div>
 
-      <button type="button" id="ci-picker" class="btn-primary" style="background:#22c55e; margin-top:10px; ${pickerSupported ? '' : 'opacity:0.45;'}" ${pickerSupported ? '' : 'disabled'}>
-        SELECIONAR CONTATOS DO CELULAR
+      <button type="button" id="ci-picker" class="btn-primary" style="background:#22c55e; margin-top:10px;">
+        ${pickerSupported ? 'SELECIONAR CONTATOS DO CELULAR' : 'IMPORTAR AGENDA (.VCF/.CSV)'}
       </button>
+      <p style="font-size:10px; opacity:0.58; line-height:1.45; margin:8px 0 0 0;">
+        ${pickerSupported
+          ? 'Quando disponível, o navegador abre a agenda do celular para seleção direta.'
+          : getContactPickerUnavailableReason()}
+      </p>
 
-      <div style="margin:16px 0; text-align:center; font-size:10px; opacity:0.5; font-weight:800;">OU</div>
-
-      <div class="form-group">
-        <label>Importar arquivo .vcf ou .csv</label>
+      <div class="form-group" style="margin-top:16px;">
+        <label>Arquivo .vcf ou .csv</label>
         <input type="file" id="ci-file" class="form-control" accept=".vcf,.csv,text/vcard,text/csv">
       </div>
       <button type="button" id="ci-file-btn" class="btn-primary" style="background:#0ea5e9; margin-top:10px;">
@@ -859,18 +862,7 @@ export async function renderContactsImportForm() {
     location.reload();
   };
 
-  const pickerButton = document.getElementById('ci-picker');
-  if (pickerButton) {
-    pickerButton.onclick = async () => {
-      try {
-        await importContacts(await pickContactsFromDevice());
-      } catch (error) {
-        alert(error.message);
-      }
-    };
-  }
-
-  document.getElementById('ci-file-btn').onclick = async () => {
+  const importSelectedFile = async () => {
     const file = document.getElementById('ci-file').files[0];
     if (!file) {
       alert('Selecione um arquivo .vcf ou .csv.');
@@ -883,6 +875,26 @@ export async function renderContactsImportForm() {
       alert('Erro ao importar contatos: ' + error.message);
     }
   };
+
+  const pickerButton = document.getElementById('ci-picker');
+  if (pickerButton) {
+    pickerButton.onclick = async () => {
+      try {
+        if (!pickerSupported) {
+          document.getElementById('ci-file')?.click();
+          return;
+        }
+        await importContacts(await pickContactsFromDevice());
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+  }
+
+  const fileInput = document.getElementById('ci-file');
+  if (fileInput) fileInput.onchange = () => importSelectedFile();
+
+  document.getElementById('ci-file-btn').onclick = importSelectedFile;
 }
 
 export default {

@@ -124,6 +124,11 @@ async function getAutomationItems() {
   };
 }
 
+export async function hasPendingAutomationMessages() {
+  const items = await getAutomationItems();
+  return items.overdue.length > 0 || items.scheduled.length > 0;
+}
+
 function renderMessageCard(item) {
   const color = item.type === 'vencida' ? '#ef4444' : '#0ea5e9';
   const label = item.type === 'vencida' ? 'MANUTENCAO VENCIDA' : 'CONFIRMACAO DE AGENDAMENTO';
@@ -147,76 +152,6 @@ function renderMessageCard(item) {
   `;
 }
 
-async function createMessageTestData() {
-  const existing = await db.clientes
-    .filter((cliente) => String(cliente.nome || '').startsWith('Teste Mensagem'))
-    .count();
-
-  if (existing > 0) {
-    alert('Dados de teste ja existem.');
-    return;
-  }
-
-  const overdueClientId = await db.clientes.add({
-    nome: 'Teste Mensagem Vencida',
-    tipo: 'Pessoa Fisica',
-    logradouro: 'Rua Teste Vencida',
-    numero: '100',
-    bairroEndereco: 'Centro',
-    cidade: 'Joao Pessoa',
-    estado: 'PB',
-    cep: '58000-000',
-    endereco: 'Rua Teste Vencida, 100, Centro, Joao Pessoa - PB, 58000-000',
-    telefone: '',
-    whatsapp: '83999990001'
-  });
-
-  await db.equipamentos.add({
-    clienteId: overdueClientId,
-    marca: 'LG',
-    btu: 12000,
-    localizacao: 'Sala',
-    ultimaManutencao: new Date(Date.now() - 1000 * 60 * 60 * 24 * 220),
-    proximaManutencao: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3)
-  });
-
-  const scheduledClientId = await db.clientes.add({
-    nome: 'Teste Mensagem Agendada',
-    tipo: 'Empresa',
-    logradouro: 'Avenida Teste Agenda',
-    numero: '200',
-    bairroEndereco: 'Manaira',
-    cidade: 'Joao Pessoa',
-    estado: 'PB',
-    cep: '58000-001',
-    endereco: 'Avenida Teste Agenda, 200, Manaira, Joao Pessoa - PB, 58000-001',
-    telefone: '',
-    whatsapp: '83999990002'
-  });
-
-  const scheduledEquipmentId = await db.equipamentos.add({
-    clienteId: scheduledClientId,
-    marca: 'Samsung',
-    btu: 18000,
-    localizacao: 'Recepcao',
-    ultimaManutencao: null,
-    proximaManutencao: null
-  });
-
-  await db.manutencoes.add({
-    clientId: scheduledClientId,
-    equipamentoId: scheduledEquipmentId,
-    status: 'agendado',
-    dataAgendada: new Date(Date.now() + 1000 * 60 * 60 * 24),
-    dataRealizada: null,
-    tipoServico: 'Limpeza',
-    descricao: 'Limpeza: teste de confirmacao automatica',
-    valor: 150,
-    formaPagamento: 'PIX'
-  });
-
-  alert('Clientes de teste criados.');
-}
 
 export async function renderComunicacao(mainContent, headerContent) {
   headerContent.innerHTML = '<h2 style="font-size: 20px; font-weight: 800; margin:0;">COMUNICACAO</h2>';
@@ -230,11 +165,6 @@ export async function renderComunicacao(mainContent, headerContent) {
     await completeAutomationMessage(itemId);
     await renderComunicacao(mainContent, headerContent);
   };
-  window.createMessageTestData = async () => {
-    await createMessageTestData();
-    await renderComunicacao(mainContent, headerContent);
-  };
-
   mainContent.innerHTML = `
     <div class="animate-in" style="display:flex; flex-direction:column; gap:16px; padding:0 20px;">
       <div class="card" style="margin:0; padding:16px;">
@@ -245,9 +175,6 @@ export async function renderComunicacao(mainContent, headerContent) {
         <p style="font-size:11px; line-height:1.45; margin:10px 0 0 0; color:var(--primary); font-weight:800;">
           Breve integração com WhatsApp e automações de mensagens.
         </p>
-        <button class="btn-primary" onclick="window.createMessageTestData()" style="background:#8b5cf6; margin-top:12px;">
-          CRIAR DADOS DE TESTE
-        </button>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px;">

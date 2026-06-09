@@ -186,9 +186,14 @@ export async function renderDashboard(mainContent, headerContent, searchTerm = '
   const hour = new Date().getHours();
   const greeting = getGreeting();
 
-  const eqsN = await db.equipamentos.toArray();
-  const scheduledN = (await db.manutencoes.toArray()).filter((item) => item.status === 'agendado');
-  const hasNotif = eqsN.some(e => 
+  const [eqs, manutencoes, clsList, undList] = await Promise.all([
+    db.equipamentos.toArray(),
+    db.manutencoes.toArray(),
+    db.clientes.toArray(),
+    db.unidades?.toArray() || []
+  ]);
+  const scheduledN = manutencoes.filter((item) => item.status === 'agendado');
+  const hasNotif = eqs.some(e => 
     e.proximaManutencao && daysUntilDate(e.proximaManutencao) <= 7
   ) || scheduledN.some((item) => item.dataAgendada && daysUntilDate(item.dataAgendada) <= 7);
   const badge = hasNotif ? 
@@ -240,13 +245,10 @@ export async function renderDashboard(mainContent, headerContent, searchTerm = '
     </div>
   `;
 
-  const eqs = await db.equipamentos.toArray();
-  const clsList = await db.clientes.toArray();
-  const undList = await db.unidades?.toArray() || [];
   const isEmpresa = authService.getBusinessMode() === 'empresa';
   const allUsers = isEmpresa ? authService.getUsers() : [];
   const currentUser = authService.getCurrentUser();
-  const scheduledServices = (await db.manutencoes.toArray())
+  const scheduledServices = manutencoes
     .filter((item) => item.status === 'agendado')
     .filter((item) => currentHomeView === 'calendario' || matchesHomeFilter(item.dataAgendada))
     .filter((item) => !authService.isEmployee() || item.tecnicoId === currentUser?.id)

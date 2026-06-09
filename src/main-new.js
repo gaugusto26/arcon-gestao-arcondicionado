@@ -15,7 +15,7 @@ import { renderHistorico, gerarPDF, renderEquipmentHistory } from './modules/his
 import { renderMais, renderTechnicianForm, exportarDados, restaurarDados, limparTodosDados, renderEditProfileForm, renderChangePasswordForm } from './modules/configuracoes/index.js';
 import { renderOrcamentos } from './modules/orcamentos/index.js';
 import { renderMateriais } from './modules/materiais/index.js';
-import { renderComunicacao } from './modules/comunicacao/index.js';
+import { hasPendingAutomationMessages, renderComunicacao } from './modules/comunicacao/index.js';
 import { renderRelatorios, gerarRelatorioMensal } from './modules/relatorios/index.js';
 
 // ============================================
@@ -201,50 +201,90 @@ function exposeAuthFunctions() {
 // NAVEGAÇÃO
 // ============================================
 
+let navigationRequestId = 0;
+
+function renderLoadingView(label = 'Carregando') {
+  headerContent.innerHTML = `<h2 style="font-size: 20px; font-weight: 800; margin:0;">${label}</h2>`;
+  mainContent.innerHTML = `
+    <div class="animate-in" style="display:flex; align-items:center; justify-content:center; min-height:45vh; padding:20px; opacity:0.55; font-size:12px; font-weight:800;">
+      Carregando...
+    </div>
+  `;
+}
+
+async function renderView(view) {
+  switch (view) {
+    case 'home':
+      await renderDashboard(mainContent, headerContent);
+      break;
+    case 'bairros':
+      await renderBairros(mainContent, headerContent);
+      break;
+    case 'os':
+      await renderHistorico(mainContent, headerContent);
+      break;
+    case 'orcamentos':
+      await renderOrcamentos(mainContent, headerContent);
+      break;
+    case 'materiais':
+      await renderMateriais(mainContent, headerContent);
+      break;
+    case 'comunicacao':
+      await renderComunicacao(mainContent, headerContent);
+      break;
+    case 'relatorios':
+      await renderRelatorios(mainContent, headerContent);
+      break;
+    case 'mais':
+      await renderMais(mainContent, headerContent);
+      break;
+  }
+}
+
+function getViewLabel(view) {
+  const labels = {
+    home: 'AGENDA',
+    bairros: 'CLIENTES',
+    os: 'HISTÓRICO',
+    orcamentos: 'ORÇAMENTOS',
+    materiais: 'MATERIAIS',
+    comunicacao: 'COMUNICAÇÃO',
+    relatorios: 'RELATÓRIOS',
+    mais: 'MAIS'
+  };
+  return labels[view] || 'CARREGANDO';
+}
+
 function setupNavigation() {
   navItems.forEach(item => {
     item.onclick = async () => {
-      const view = item.dataset.view;
+      let view = item.dataset.view;
+      let activeItem = item;
+
       if (authService.isEmployee() && !['home', 'os'].includes(view)) {
-        navItems.forEach(n => n.classList.remove('active'));
-        document.querySelector('.nav-item[data-view="home"]')?.classList.add('active');
-        await renderDashboard(mainContent, headerContent);
-        return;
+        view = 'home';
+        activeItem = document.querySelector('.nav-item[data-view="home"]') || item;
       }
 
-      // Atualizar UI
+      const requestId = ++navigationRequestId;
       navItems.forEach(n => n.classList.remove('active'));
-      item.classList.add('active');
-      
-      // Renderizar view
-      switch (view) {
-        case 'home':
-          renderDashboard(mainContent, headerContent);
-          break;
-        case 'bairros':
-          renderBairros(mainContent, headerContent);
-          break;
-        case 'os':
-          renderHistorico(mainContent, headerContent);
-          break;
-        case 'orcamentos':
-          renderOrcamentos(mainContent, headerContent);
-          break;
-        case 'materiais':
-          renderMateriais(mainContent, headerContent);
-          break;
-        case 'comunicacao':
-          renderComunicacao(mainContent, headerContent);
-          break;
-        case 'relatorios':
-          renderRelatorios(mainContent, headerContent);
-          break;
-        case 'mais':
-          renderMais(mainContent, headerContent);
-          break;
+      activeItem.classList.add('active');
+      renderLoadingView(getViewLabel(view));
+
+      try {
+        await renderView(view);
+      } catch (error) {
+        if (requestId !== navigationRequestId) return;
+        console.error('Erro ao renderizar view:', error);
+        headerContent.innerHTML = `<h2 style="font-size: 20px; font-weight: 800; margin:0;">${getViewLabel(view)}</h2>`;
+        mainContent.innerHTML = `
+          <div style="text-align:center; opacity:0.55; padding:40px 20px; font-size:12px; line-height:1.5;">
+            Não foi possível carregar esta tela.
+          </div>
+        `;
       }
 
-      await updateMessagesBadge();
+      updateMessagesBadge().catch((error) => console.error('Erro ao atualizar badge:', error));
     };
   });
 }
@@ -256,29 +296,8 @@ function updateNavigationAccess() {
   });
 }
 
-function daysUntil(value) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(value);
-  target.setHours(0, 0, 0, 0);
-  return Math.ceil((target - today) / 86400000);
-}
-
 async function hasPendingMessages() {
-  const equipamentos = await db.equipamentos.toArray();
-  const manutencoes = await db.manutencoes.toArray();
-  const hasOverdueMaintenance = equipamentos.some((equipamento) =>
-    equipamento.proximaManutencao
-      && daysUntil(equipamento.proximaManutencao) < 0
-      && localStorage.getItem(`msg_done_vencida-${equipamento.id}`) !== '1'
-  );
-  const hasScheduledConfirmation = manutencoes.some((item) =>
-    item.status === 'agendado'
-      && item.dataAgendada
-      && localStorage.getItem(`msg_done_agendada-${item.id}`) !== '1'
-  );
-
-  return hasOverdueMaintenance || hasScheduledConfirmation;
+  return hasPendingAutomationMessages();
 }
 
 async function updateMessagesBadge() {

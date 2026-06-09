@@ -26,7 +26,18 @@ export async function renderHistorico(mainContent, headerContent) {
   headerContent.innerHTML = '<h2 style="font-size: 20px; font-weight: 800; margin:0;">HISTÓRICO</h2>';
   const canManage = authService.isAdmin();
   
-  const os = await db.manutencoes.reverse().toArray();
+  const [manutencoes, equipamentos, clientes] = await Promise.all([
+    db.manutencoes.toArray(),
+    db.equipamentos.toArray(),
+    db.clientes.toArray()
+  ]);
+  const equipamentosById = new Map(equipamentos.map((item) => [item.id, item]));
+  const clientesById = new Map(clientes.map((item) => [item.id, item]));
+  const os = manutencoes.sort((a, b) => {
+    const dateA = new Date(a.dataRealizada || a.dataAgendada || 0).getTime();
+    const dateB = new Date(b.dataRealizada || b.dataAgendada || 0).getTime();
+    return dateB - dateA;
+  });
   
   let html = '<div class="animate-in" style="display: flex; flex-direction: column; gap: 15px; padding: 0 20px;">';
   
@@ -34,8 +45,8 @@ export async function renderHistorico(mainContent, headerContent) {
     html += '<p style="text-align:center; opacity:0.3; padding:40px;">Sem registros.</p>';
   } else {
     for (const m of os) {
-      const e = m.equipamentoId ? await db.equipamentos.get(m.equipamentoId) : null;
-      const c = m.clientId ? await db.clientes.get(m.clientId) : (e ? await db.clientes.get(e.clienteId) : null);
+      const e = m.equipamentoId ? equipamentosById.get(m.equipamentoId) : null;
+      const c = m.clientId ? clientesById.get(m.clientId) : (e ? clientesById.get(e.clienteId) : null);
       const serviceType = m.tipoServico || (m.descricao && m.descricao.includes('Corretiva') ? 'CORRETIVA' : 'PREVENTIVA');
       const isCor = serviceType.toLowerCase().includes('corretiva');
       const tel = c?.whatsapp || '';
