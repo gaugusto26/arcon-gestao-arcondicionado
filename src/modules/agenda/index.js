@@ -10,7 +10,7 @@ import {
 import { 
   openModal, getAvatarUrl, getLogo, formatDate, 
   formatCurrency, daysUntilDate, getGreeting, CONSTANTS,
-  modalBody, fileToBase64
+  modalBody, fileToBase64, resizeServicePhoto
 } from '../../services/ui.js';
 import { authService } from '../../services/auth.js';
 import { comunicacaoService } from '../../services/comunicacao.js';
@@ -630,8 +630,8 @@ ${defaultType ? defaultType + ': ' : ''}        </textarea>
     const fId = Number(document.getElementById('m-eq').value);
     const nxD = new Date(document.getElementById('m-nx').value);
     const ftInput = document.getElementById('m-ft');
-    const fotoBase64 = ftInput.files.length > 0 ? 
-      await fileToBase64(ftInput.files[0]) : null;
+    const fotoBase64 = ftInput.files.length > 0 ?
+      await resizeServicePhoto(ftInput.files[0]) : null;
     
     await db.manutencoes.add({
       equipamentoId: fId,

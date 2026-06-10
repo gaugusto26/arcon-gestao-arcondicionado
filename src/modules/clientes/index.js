@@ -3,7 +3,7 @@
  */
 
 import { db } from '../../services/db.js';
-import { openModal, modalBody, CONSTANTS, fileToBase64 } from '../../services/ui.js';
+import { openModal, modalBody, CONSTANTS, resizeServicePhoto } from '../../services/ui.js';
 import { authService } from '../../services/auth.js';
 import { getContactPickerUnavailableReason, isContactPickerSupported, normalizeContact, parseContactsFile, pickContactsFromDevice } from '../../services/contacts.js';
 
@@ -622,7 +622,7 @@ export async function renderCloseScheduledServiceForm(servicoId) {
   window._addFotoClose = async () => {
     const input = document.getElementById('cs-foto-input');
     if (!input?.files[0] || fotosClose.length >= 3) return;
-    const base64 = await fileToBase64(input.files[0]);
+    const base64 = await resizeServicePhoto(input.files[0]);
     refreshFotosClose([...fotosClose, base64]);
   };
 
@@ -753,7 +753,7 @@ export async function renderEditServiceForm(servicoId) {
     const input = document.getElementById('es-foto-input');
     if (!input?.files[0]) return;
     if (fotosAtuais.length >= 3) return;
-    const base64 = await fileToBase64(input.files[0]);
+    const base64 = await resizeServicePhoto(input.files[0]);
     fotosAtuais.push(base64);
     renderEditServiceForm._refreshPhotos(fotosAtuais, servicoId);
   };
