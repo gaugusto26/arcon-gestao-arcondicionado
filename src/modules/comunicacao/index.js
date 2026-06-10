@@ -124,11 +124,6 @@ async function getAutomationItems() {
   };
 }
 
-export async function hasPendingAutomationMessages() {
-  const items = await getAutomationItems();
-  return items.overdue.length > 0 || items.scheduled.length > 0;
-}
-
 function renderMessageCard(item) {
   const color = item.type === 'vencida' ? '#ef4444' : '#0ea5e9';
   const label = item.type === 'vencida' ? 'MANUTENCAO VENCIDA' : 'CONFIRMACAO DE AGENDAMENTO';
@@ -153,6 +148,11 @@ function renderMessageCard(item) {
 }
 
 
+export async function hasPendingAutomationMessages() {
+  const items = await getAutomationItems();
+  return items.overdue.length > 0 || items.scheduled.length > 0;
+}
+
 export async function renderComunicacao(mainContent, headerContent) {
   headerContent.innerHTML = '<h2 style="font-size: 20px; font-weight: 800; margin:0;">COMUNICACAO</h2>';
 
@@ -170,7 +170,7 @@ export async function renderComunicacao(mainContent, headerContent) {
       <div class="card" style="margin:0; padding:16px;">
         <h3 style="font-size:15px; margin:0;">Automacao de mensagens</h3>
         <p style="font-size:11px; opacity:0.65; line-height:1.45; margin:8px 0 0 0;">
-          O app prepara as mensagens automaticamente. Pelo WhatsApp comum, o envio precisa ser confirmado por voce.
+          O app prepara as mensagens automaticamente pelo WhatsApp, mas o envio precisa ser confirmado por você.
         </p>
         <p style="font-size:11px; line-height:1.45; margin:10px 0 0 0; color:var(--primary); font-weight:800;">
           Breve integração com WhatsApp e automações de mensagens.

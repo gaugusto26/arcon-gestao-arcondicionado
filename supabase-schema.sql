@@ -188,14 +188,16 @@ $$;
 -- ============================================================
 
 create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+set search_path = public
+as $$
 begin
   insert into public.profiles (id, name, role, business_mode)
   values (
     new.id,
     new.raw_user_meta_data->>'name',
     coalesce(new.raw_user_meta_data->>'role', 'administrativo'),
-    coalesce(new.raw_user_meta_data->>'businessMode', 'autonomo')
+    coalesce(new.raw_user_meta_data->>'businessMode', new.raw_user_meta_data->>'business_mode', 'autonomo')
   ) on conflict (id) do nothing;
   return new;
 end;

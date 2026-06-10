@@ -146,12 +146,18 @@ function renderAuthScreen(mode = 'login') {
     event.preventDefault();
     try {
       if (isCadastro) {
-        await authService.register({
+        const result = await authService.register({
           name:         document.getElementById('auth-name').value,
           email:        document.getElementById('auth-login').value,
           password:     document.getElementById('auth-password').value,
           businessMode: document.getElementById('auth-business-mode')?.value
         });
+
+        if (result?.pendingEmailConfirmation) {
+          alert('Cadastro criado. Confirme seu e-mail antes de entrar.');
+          renderAuthScreen('login');
+          return;
+        }
       } else {
         await authService.login(
           document.getElementById('auth-login').value,

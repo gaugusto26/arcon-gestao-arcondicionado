@@ -8,6 +8,10 @@ import { setOwnerId } from './db.js';
 let _session = null;
 let _currentUser = null;
 
+function normalizeBusinessMode(businessMode) {
+  return businessMode === 'empresa' ? 'empresa' : 'autonomo';
+}
+
 async function loadProfile(user) {
   const { data: profile } = await supabase
     .from('profiles')
@@ -21,7 +25,9 @@ async function loadProfile(user) {
     login:        user.email,
     name:         profile?.name || user.user_metadata?.name || 'Usuário',
     role:         profile?.role || 'administrativo',
-    businessMode: profile?.business_mode || 'autonomo',
+    businessMode: normalizeBusinessMode(
+      profile?.business_mode || user.user_metadata?.businessMode || user.user_metadata?.business_mode
+    ),
     avatar:       profile?.avatar || null,
     createdAt:    user.created_at
   };
@@ -81,6 +87,7 @@ export const authService = {
     const cleanName  = String(name || '').trim();
     const cleanEmail = String(email || '').trim().toLowerCase();
     const cleanPass  = String(password || '').trim();
+    const cleanMode  = normalizeBusinessMode(businessMode);
 
     if (!cleanName || !cleanEmail || !cleanPass) {
       throw new Error('Preencha nome, e-mail e senha.');
@@ -96,16 +103,37 @@ export const authService = {
         data: {
           name: cleanName,
           role: 'administrativo',
-          businessMode: businessMode || 'autonomo'
+          businessMode: cleanMode,
+          business_mode: cleanMode
         }
       }
     });
 
     if (error) throw new Error(error.message);
 
+    if (!data.session) {
+      _session = null;
+      _currentUser = null;
+      setOwnerId(null);
+      return { pendingEmailConfirmation: true };
+    }
+
     _session = data.session;
     setOwnerId(data.session?.user?.id);
-    if (data.user) await loadProfile(data.user);
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: data.user.id,
+          name: cleanName,
+          role: 'administrativo',
+          business_mode: cleanMode
+        }, { onConflict: 'id' });
+
+      if (profileError) throw new Error(profileError.message);
+
+      await loadProfile(data.user);
+    }
     return _currentUser;
   },
 
