@@ -499,7 +499,13 @@ export async function renderCloseScheduledServiceForm(servicoId) {
         <input type="text" class="form-control" value="${servico.tipoServico || ''}" disabled>
       </div>
       <div class="form-group">
-        <label>Equipamento atendido</label>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <label style="margin:0;">Equipamento atendido</label>
+          <button type="button" onclick="window._addEquipmentFromClose()" style="background:var(--primary); border:none; border-radius:8px; color:#fff; font-size:10px; font-weight:800; padding:5px 10px; cursor:pointer; display:flex; align-items:center; gap:4px;">
+            <span class="material-symbols-rounded" style="font-size:14px;">add</span>
+            NOVO
+          </button>
+        </div>
         <select id="cs-equipamento" class="form-control" required>
           <option value="">Selecionar equipamento...</option>
           ${equipamentos.map((equipamento) => `
@@ -544,6 +550,8 @@ export async function renderCloseScheduledServiceForm(servicoId) {
     </form>
   `;
 
+  window._addEquipmentFromClose = () => renderEquipmentForm(servico.clientId, null, () => renderCloseScheduledServiceForm(servicoId));
+
   document.getElementById('f-close-service').onsubmit = async (event) => {
     event.preventDefault();
 
@@ -572,7 +580,7 @@ export async function renderCloseScheduledServiceForm(servicoId) {
   };
 }
 
-export async function renderEquipmentForm(clienteId, equipamentoId = null) {
+export async function renderEquipmentForm(clienteId, equipamentoId = null, onSave = null) {
   const isEditing = Boolean(equipamentoId);
   const cliente = await db.clientes.get(clienteId);
   const equipamento = isEditing ? await db.equipamentos.get(equipamentoId) : null;
@@ -632,7 +640,11 @@ export async function renderEquipmentForm(clienteId, equipamentoId = null) {
       });
     }
 
-    await renderClientDetail(clienteId);
+    if (onSave) {
+      await onSave();
+    } else {
+      await renderClientDetail(clienteId);
+    }
   };
 }
 
