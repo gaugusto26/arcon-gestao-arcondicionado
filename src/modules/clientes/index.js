@@ -102,9 +102,14 @@ async function getClientMaintenances(clienteId, equipamentos) {
   const equipmentIds = equipamentos.map((equipamento) => equipamento.id);
   const manutencoes = await db.manutencoes.toArray();
 
-  return manutencoes
+  const all = manutencoes
     .filter((manutencao) => manutencao.clientId === clienteId || equipmentIds.includes(manutencao.equipamentoId))
     .sort((a, b) => new Date(b.dataRealizada || b.dataAgendada || 0) - new Date(a.dataRealizada || a.dataAgendada || 0));
+
+  return {
+    agendados: all.filter((m) => m.status === 'agendado'),
+    concluidos: all.filter((m) => m.status === 'concluido'),
+  };
 }
 
 export function setClientFilter(filter) {
@@ -302,26 +307,45 @@ export async function renderClientDetail(clienteId) {
         </div>
       </div>
 
+      ${historico.agendados.length > 0 ? `
+      <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+        <label style="font-size:11px; font-weight:800; color:#f59e0b;">AGENDADOS</label>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+          ${historico.agendados.map((servico) => {
+            const equipamento = equipamentos.find((item) => item.id === servico.equipamentoId);
+            return `
+              <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; border-left:3px solid #f59e0b;">
+                <div style="display:flex; justify-content:space-between; gap:8px;">
+                  <p style="margin:0; font-size:11px; font-weight:800;">${servico.tipoServico || 'Serviço'}</p>
+                  <p style="margin:0; font-size:9px; opacity:0.55;">${formatDateTime(servico.dataAgendada)}</p>
+                </div>
+                <p style="margin:5px 0 0 0; font-size:9px; opacity:0.55;">${equipamento ? `${equipamento.marca} • ${equipamento.localizacao || 'Local não informado'}` : 'Serviço do cliente'}</p>
+                <button class="btn-primary" onclick="window.renderCloseScheduledServiceForm(${servico.id})" style="font-size:9px; padding:9px; margin-top:8px; background:#22c55e;">FECHAR SERVIÇO</button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+      ` : ''}
+
       <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
         <label style="font-size:11px; font-weight:800; color:var(--primary);">HISTÓRICO DO CLIENTE</label>
         <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
-          ${historico.length > 0 ? historico.map((servico) => {
+          ${historico.concluidos.length > 0 ? historico.concluidos.map((servico) => {
             const equipamento = equipamentos.find((item) => item.id === servico.equipamentoId);
+            const isCor = (servico.tipoServico || '').toLowerCase().includes('corretiva');
             return `
-              <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; border-left:3px solid #22c55e;">
+              <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:6px; border-left:3px solid ${isCor ? '#ff9d00' : '#22c55e'};">
                 <div style="display:flex; justify-content:space-between; gap:8px;">
-                  <p style="margin:0; font-size:11px; font-weight:800;">${servico.tipoServico || 'Serviço'} ${servico.status === 'agendado' ? '(Agendado)' : ''}</p>
-                  <p style="margin:0; font-size:9px; opacity:0.55;">${formatDateTime(servico.dataRealizada || servico.dataAgendada)}</p>
+                  <p style="margin:0; font-size:11px; font-weight:800;">${servico.tipoServico || 'Serviço'}</p>
+                  <p style="margin:0; font-size:9px; opacity:0.55;">${formatDateTime(servico.dataRealizada)}</p>
                 </div>
                 <p style="margin:5px 0 0 0; font-size:10px; opacity:0.75;">${servico.descricao || '-'}</p>
                 <p style="margin:5px 0 0 0; font-size:9px; opacity:0.55;">${equipamento ? `${equipamento.marca} • ${equipamento.localizacao || 'Local não informado'}` : 'Serviço do cliente'}</p>
                 ${servico.valor ? `<p style="margin:5px 0 0 0; font-size:10px; color:#22c55e; font-weight:800;">R$ ${Number(servico.valor).toFixed(2)}</p>` : ''}
-                ${servico.status === 'agendado' ? `
-                  <button class="btn-primary" onclick="window.renderCloseScheduledServiceForm(${servico.id})" style="font-size:9px; padding:9px; margin-top:8px; background:#22c55e;">FECHAR SERVIÇO</button>
-                ` : ''}
               </div>
             `;
-          }).join('') : '<p style="font-size:10px; opacity:0.5;">Nenhum serviço registrado ainda</p>'}
+          }).join('') : '<p style="font-size:10px; opacity:0.5;">Nenhum serviço concluído ainda</p>'}
         </div>
       </div>
     </div>

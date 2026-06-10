@@ -33,11 +33,9 @@ export async function renderHistorico(mainContent, headerContent) {
   ]);
   const equipamentosById = new Map(equipamentos.map((item) => [item.id, item]));
   const clientesById = new Map(clientes.map((item) => [item.id, item]));
-  const os = manutencoes.sort((a, b) => {
-    const dateA = new Date(a.dataRealizada || a.dataAgendada || 0).getTime();
-    const dateB = new Date(b.dataRealizada || b.dataAgendada || 0).getTime();
-    return dateB - dateA;
-  });
+  const os = manutencoes
+    .filter((m) => m.status === 'concluido')
+    .sort((a, b) => new Date(b.dataRealizada || 0) - new Date(a.dataRealizada || 0));
   
   let html = '<div class="animate-in" style="display: flex; flex-direction: column; gap: 15px; padding: 0 20px;">';
   
@@ -47,7 +45,7 @@ export async function renderHistorico(mainContent, headerContent) {
     for (const m of os) {
       const e = m.equipamentoId ? equipamentosById.get(m.equipamentoId) : null;
       const c = m.clientId ? clientesById.get(m.clientId) : (e ? clientesById.get(e.clienteId) : null);
-      const serviceType = m.tipoServico || (m.descricao && m.descricao.includes('Corretiva') ? 'CORRETIVA' : 'PREVENTIVA');
+      const serviceType = m.tipoServico || 'PREVENTIVA';
       const isCor = serviceType.toLowerCase().includes('corretiva');
       const tel = c?.whatsapp || '';
       
@@ -152,8 +150,10 @@ export async function gerarPDF(manutencaoId) {
 export async function renderEquipmentHistory(equipamentoId) {
   const equipamento = await db.equipamentos.get(equipamentoId);
   const cliente = await db.clientes.get(equipamento.clienteId);
-  const manutencoes = await db.manutencoes.where('equipamentoId').equals(equipamentoId).toArray();
-  
+  const manutencoes = (await db.manutencoes.where('equipamentoId').equals(equipamentoId).toArray())
+    .filter((m) => m.status === 'concluido')
+    .sort((a, b) => new Date(b.dataRealizada || 0) - new Date(a.dataRealizada || 0));
+
   const modalOverlay = document.getElementById('modal-overlay');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
@@ -197,20 +197,20 @@ export async function renderEquipmentHistory(equipamentoId) {
     <h4 style="font-size:11px; font-weight:800; margin:15px 0 10px 0;">HISTÓRICO DE MANUTENÇÕES</h4>
     
     <div style="display:flex; flex-direction:column; gap:10px;">
-      ${manutencoes.length > 0 ? manutencoes.map(m => `
-        <div style="background:rgba(0,0,0,0.2); padding:10px; border-left:3px solid ${m.descricao.includes('Corretiva') ? '#ff9d00' : '#22c55e'}; border-radius:6px;">
+      ${manutencoes.length > 0 ? manutencoes.map(m => {
+        const isCor = (m.tipoServico || '').toLowerCase().includes('corretiva');
+        const cor = isCor ? '#ff9d00' : '#22c55e';
+        const desc = m.descricao || '-';
+        return `
+        <div style="background:rgba(0,0,0,0.2); padding:10px; border-left:3px solid ${cor}; border-radius:6px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <span style="font-size:9px; font-weight:700;">
-              ${formatDateTime(m.dataRealizada || m.dataAgendada)}
-            </span>
-            <span style="font-size:8px; font-weight:700; color:${m.descricao.includes('Corretiva') ? '#ff9d00' : '#22c55e'};">
-              ${m.descricao.includes('Corretiva') ? 'CORRETIVA' : 'PREVENTIVA'}
-            </span>
+            <span style="font-size:9px; font-weight:700;">${formatDateTime(m.dataRealizada)}</span>
+            <span style="font-size:8px; font-weight:700; color:${cor};">${m.tipoServico || 'PREVENTIVA'}</span>
           </div>
-          <p style="margin:4px 0; font-size:10px; opacity:0.8;">${m.descricao.substring(0, 50)}...</p>
+          <p style="margin:4px 0; font-size:10px; opacity:0.8;">${desc.length > 80 ? desc.substring(0, 80) + '...' : desc}</p>
           ${m.valor ? `<p style="margin:4px 0 0 0; font-size:10px; font-weight:700; color:#22c55e;">R$ ${Number(m.valor).toFixed(2)}</p>` : ''}
         </div>
-      `).join('') : '<p style="font-size:10px; opacity:0.5;">Nenhuma manutenção registrada</p>'}
+      `}).join('') : '<p style="font-size:10px; opacity:0.5;">Nenhuma manutenção registrada</p>'}
     </div>
   `;
   
