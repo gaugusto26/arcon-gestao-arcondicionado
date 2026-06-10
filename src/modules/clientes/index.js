@@ -405,8 +405,8 @@ export async function renderClientServiceForm(clienteId, initialStatus = 'agenda
       ${isAdminEmpresa ? `
       <div class="form-group">
         <label>Técnico responsável</label>
-        <select id="s-tecnico" class="form-control" required>
-          <option value="" disabled selected>Selecionar técnico...</option>
+        <select id="s-tecnico" class="form-control">
+          <option value="">Técnico não atribuído</option>
           ${tecnicos.map((t) => `<option value="${t.id}">${t.name}</option>`).join('')}
         </select>
       </div>
@@ -535,7 +535,7 @@ export async function renderCloseScheduledServiceForm(servicoId) {
       <div class="form-group">
         <label>Técnico responsável</label>
         <select id="cs-tecnico" class="form-control">
-          <option value="">Sem atribuição</option>
+          <option value="">Técnico não atribuído</option>
           ${tecnicos.map((t) => `<option value="${t.id}" ${servico.tecnicoId === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
         </select>
       </div>
