@@ -1,8 +1,7 @@
 /**
- * Modulo CONFIGURACOES - backup, restauracao e sessao do usuario
+ * Modulo CONFIGURACOES
  */
 
-import { db, exportDatabase, importDatabase } from '../../services/db.js';
 import { authService } from '../../services/auth.js';
 import { openModal, closeModal, modalBody, getAvatarUrl } from '../../services/ui.js';
 
@@ -165,37 +164,7 @@ export async function renderMais(mainContent, headerContent) {
       </div>
       ` : ''}
 
-      <!-- DADOS & BACKUP -->
-      <div class="card" style="margin:0;">
-        <h4 style="font-size:12px; font-weight:800; margin:0 0 15px 0; color:var(--primary);">DADOS & BACKUP</h4>
-        <div style="display:flex; flex-direction:column; gap:10px;">
-          <button class="btn-primary" onclick="window.exportarDados()" style="background:#0ea5e9; margin-top:0;">
-            <span class="material-symbols-rounded" style="font-size:16px;">backup</span>
-            FAZER BACKUP (BAIXAR)
-          </button>
-          <button class="btn-primary" onclick="window.restaurarDados()" style="background:#8b5cf6; margin-top:0;">
-            <span class="material-symbols-rounded" style="font-size:16px;">restore</span>
-            RESTAURAR DO BACKUP
-          </button>
-        </div>
-      </div>
-
-      <!-- PERIGO -->
-      <div class="card" style="margin:0; border-top:3px solid #ff4d4d;">
-        <h4 style="font-size:12px; font-weight:800; margin:0 0 15px 0; color:#ff4d4d;">PERIGO</h4>
-        <button class="btn-primary" onclick="window.limparTodosDados()" style="background:#ff4d4d; margin-top:0;">
-          <span class="material-symbols-rounded" style="font-size:16px;">delete_forever</span>
-          LIMPAR TODOS OS DADOS
-        </button>
-      </div>
-      ` : `
-      <div class="card" style="margin:0;">
-        <h4 style="font-size:12px; font-weight:800; margin:0 0 10px 0; color:var(--primary);">ACESSO TÉCNICO</h4>
-        <p style="font-size:12px; opacity:0.65; margin:0; line-height:1.5;">
-          Backup, restauração e limpeza de dados ficam disponíveis apenas para o administrador.
-        </p>
-      </div>
-      `}
+      ` : ``}
 
       <!-- SUPORTE & SOBRE -->
       <div class="card" style="margin:0;">
@@ -349,7 +318,7 @@ export function renderTechnicianForm() {
       </div>
       <div style="background:rgba(255,255,255,0.04); border-radius:8px; padding:11px; margin-bottom:14px;">
         <p style="font-size:10px; opacity:0.72; margin:0; line-height:1.5;">
-          Este funcionário terá acesso limitado. Funções administrativas, backup, restauração e limpeza de dados ficam bloqueadas.
+          Este funcionário terá acesso limitado às funções administrativas.
         </p>
       </div>
       <button type="submit" class="btn-primary">CADASTRAR FUNCIONÁRIO</button>
@@ -373,111 +342,7 @@ export function renderTechnicianForm() {
   };
 }
 
-/**
- * Exportar dados do banco para JSON
- */
-export async function exportarDados() {
-  try {
-    const jsonData = await exportDatabase();
-    
-    // Criar blob e download
-    const blob = new Blob([jsonData], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `backup-ar-jampa-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    alert('Backup realizado com sucesso!');
-  } catch (error) {
-    alert('Erro ao fazer backup: ' + error.message);
-  }
-}
-
-/**
- * Restaurar dados do backup
- */
-export async function restaurarDados() {
-  openModal('Restaurar Backup');
-  
-  modalBody.innerHTML = `
-    <form id="f-restore">
-      <div class="form-group">
-        <label>Selecione o arquivo de backup (.json)</label>
-        <input type="file" id="r-file" class="form-control" accept=".json" required>
-      </div>
-      <p style="font-size:10px; opacity:0.6; margin-top:10px;">
-        ⚠️ Aviso: Esta ação irá substituir TODOS os seus dados atuais. Tenha certeza antes de continuar!
-      </p>
-      <button type="submit" class="btn-primary" style="margin-top:15px;">RESTAURAR DADOS</button>
-    </form>
-  `;
-  
-  document.getElementById('f-restore').onsubmit = async (ev) => {
-    ev.preventDefault();
-    
-    const fileInput = document.getElementById('r-file');
-    if (!fileInput.files[0]) {
-      alert('Selecione um arquivo de backup');
-      return;
-    }
-    
-    const file = fileInput.files[0];
-    const text = await file.text();
-    
-    const result = await importDatabase(text);
-    
-    if (result.success) {
-      alert('Dados restaurados com sucesso! A página será recarregada.');
-      location.reload();
-    } else {
-      alert('Erro ao restaurar dados: ' + result.error);
-    }
-  };
-}
-
-/**
- * Limpar todos os dados (com confirmação)
- */
-export async function limparTodosDados() {
-  const confirmacao = confirm(
-    'ATENÇÃO! Isto irá deletar TODOS os seus dados do aplicativo.\n' +
-    'Clique em OK apenas se tem certeza disso.\n\n' +
-    'Esta ação NÃO pode ser desfeita!'
-  );
-  
-  if (!confirmacao) return;
-  
-  const confirmacao2 = confirm(
-    'Tem CERTEZA ABSOLUTA? Todos os seus clientes, equipamentos e manutenções serão permanentemente deletados!'
-  );
-  
-  if (!confirmacao2) return;
-  
-  try {
-    await db.clientes.clear();
-    await db.equipamentos.clear();
-    await db.unidades?.clear();
-    await db.manutencoes.clear();
-    await db.materiais?.clear();
-    await db.materiaisUsados?.clear();
-    await db.orcamentos?.clear();
-    await db.comunicacao?.clear();
-    
-    alert('Todos os dados foram deletados. A página será recarregada.');
-    location.reload();
-  } catch (error) {
-    alert('Erro ao limpar dados: ' + error.message);
-  }
-}
-
 export default {
   renderMais,
-  renderTechnicianForm,
-  exportarDados,
-  restaurarDados,
-  limparTodosDados
+  renderTechnicianForm
 };

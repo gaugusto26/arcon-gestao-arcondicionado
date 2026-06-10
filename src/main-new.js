@@ -12,7 +12,7 @@ import { authService } from './services/auth.js';
 import { renderDashboard, showNotifications, setHomeFilter, renderMaintenanceForm, showFinancialReport, renderNewServicePrompt, renderNewServiceLaunch } from './modules/agenda/index.js';
 import { renderBairros, renderBairroDetail, renderClientDetail, renderBairroForm, renderFullPropertyForm, renderContactsImportForm, renderClientServiceForm, renderCloseScheduledServiceForm, renderEquipmentForm } from './modules/clientes/index.js';
 import { renderHistorico, gerarPDF, renderEquipmentHistory } from './modules/historico/index.js';
-import { renderMais, renderTechnicianForm, exportarDados, restaurarDados, limparTodosDados, renderEditProfileForm, renderChangePasswordForm } from './modules/configuracoes/index.js';
+import { renderMais, renderTechnicianForm, renderEditProfileForm, renderChangePasswordForm } from './modules/configuracoes/index.js';
 import { renderOrcamentos } from './modules/orcamentos/index.js';
 import { renderMateriais } from './modules/materiais/index.js';
 import { hasPendingAutomationMessages, renderComunicacao } from './modules/comunicacao/index.js';
@@ -340,10 +340,7 @@ function exposeGlobalFunctions() {
   
   // Configurações
   window.renderTechnicianForm = renderTechnicianForm;
-  window.exportarDados = exportarDados;
-  window.restaurarDados = restaurarDados;
-  window.limparTodosDados = limparTodosDados;
-  window.renderEditProfileForm = renderEditProfileForm;
+window.renderEditProfileForm = renderEditProfileForm;
   window.renderChangePasswordForm = renderChangePasswordForm;
   
   // Deletar item genérico
