@@ -1,0 +1,23 @@
+services:
+  arcon:
+    build: .
+    container_name: arcon
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      # HTTPS
+      - "traefik.http.routers.arcon.rule=Host(`arcon.digitalfive.com.br`)"
+      - "traefik.http.routers.arcon.entrypoints=websecure"
+      - "traefik.http.routers.arcon.tls.certresolver=le"
+      - "traefik.http.services.arcon.loadbalancer.server.port=80"
+      # HTTP -> HTTPS redirect
+      - "traefik.http.routers.arcon-http.rule=Host(`arcon.digitalfive.com.br`)"
+      - "traefik.http.routers.arcon-http.entrypoints=web"
+      - "traefik.http.routers.arcon-http.middlewares=redirect-https@docker"
+      - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
+
+networks:
+  web:
+    external: true
