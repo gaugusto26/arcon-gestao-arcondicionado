@@ -3,7 +3,7 @@
  */
 
 import { db } from '../../services/db.js';
-import { openModal, modalBody, CONSTANTS } from '../../services/ui.js';
+import { openModal, modalBody, CONSTANTS, fileToBase64 } from '../../services/ui.js';
 import { authService } from '../../services/auth.js';
 import { getContactPickerUnavailableReason, isContactPickerSupported, normalizeContact, parseContactsFile, pickContactsFromDevice } from '../../services/contacts.js';
 
@@ -320,7 +320,10 @@ export async function renderClientDetail(clienteId) {
                   <p style="margin:0; font-size:9px; opacity:0.55;">${formatDateTime(servico.dataAgendada)}</p>
                 </div>
                 <p style="margin:5px 0 0 0; font-size:9px; opacity:0.55;">${equipamento ? `${equipamento.marca} • ${equipamento.localizacao || 'Local não informado'}` : 'Serviço do cliente'}</p>
-                <button class="btn-primary" onclick="window.renderCloseScheduledServiceForm(${servico.id})" style="font-size:9px; padding:9px; margin-top:8px; background:#22c55e;">FECHAR SERVIÇO</button>
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                  <button class="btn-primary" onclick="window.renderEditServiceForm(${servico.id})" style="font-size:9px; padding:9px; flex:1; background:#0ea5e9;">EDITAR</button>
+                  <button class="btn-primary" onclick="window.renderCloseScheduledServiceForm(${servico.id})" style="font-size:9px; padding:9px; flex:1; background:#22c55e;">FECHAR SERVIÇO</button>
+                </div>
               </div>
             `;
           }).join('')}
@@ -561,6 +564,10 @@ export async function renderCloseScheduledServiceForm(servicoId) {
         <label>Descrição final</label>
         <textarea id="cs-desc" class="form-control" rows="3">${servico.descricao || ''}</textarea>
       </div>
+      <div class="form-group">
+        <label>Observações</label>
+        <textarea id="cs-obs" class="form-control" rows="2" placeholder="Observações internas sobre o serviço...">${servico.observacoes || ''}</textarea>
+      </div>
       ${isAdminEmpresa ? `
       <div class="form-group">
         <label>Técnico responsável</label>
@@ -570,11 +577,60 @@ export async function renderCloseScheduledServiceForm(servicoId) {
         </select>
       </div>
       ` : ''}
+      <div class="form-group">
+        <label>Fotos do serviço (até 3)</label>
+        <div id="cs-fotos-preview" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+          ${(servico.fotos || []).map((f, i) => `
+            <div style="position:relative;">
+              <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
+              <button type="button" onclick="window._removeFotoClose(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
+                <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
+              </button>
+            </div>
+          `).join('')}
+        </div>
+        ${(servico.fotos || []).length < 3 ? `
+        <input type="file" id="cs-foto-input" class="form-control" accept="image/*" capture="environment" style="padding:8px;">
+        <button type="button" onclick="window._addFotoClose()" style="width:100%; margin-top:8px; background:rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.25); border-radius:10px; color:#fff; padding:10px; cursor:pointer; font-size:11px; font-weight:700;">
+          <span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">add_photo_alternate</span>
+          ADICIONAR FOTO (${(servico.fotos || []).length}/3)
+        </button>
+        ` : `<p style="font-size:10px; opacity:0.5; margin:0;">Limite de 3 fotos atingido</p>`}
+      </div>
       <button type="submit" class="btn-primary">FECHAR SERVIÇO</button>
     </form>
   `;
 
   window._addEquipmentFromClose = () => renderEquipmentForm(servico.clientId, null, () => renderCloseScheduledServiceForm(servicoId));
+
+  let fotosClose = [...(servico.fotos || [])];
+
+  const refreshFotosClose = (fotos) => {
+    const preview = document.getElementById('cs-fotos-preview');
+    if (!preview) return;
+    preview.innerHTML = fotos.map((f, i) => `
+      <div style="position:relative;">
+        <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
+        <button type="button" onclick="window._removeFotoClose(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
+          <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
+        </button>
+      </div>
+    `).join('');
+    fotosClose = fotos;
+  };
+
+  window._addFotoClose = async () => {
+    const input = document.getElementById('cs-foto-input');
+    if (!input?.files[0] || fotosClose.length >= 3) return;
+    const base64 = await fileToBase64(input.files[0]);
+    refreshFotosClose([...fotosClose, base64]);
+  };
+
+  window._removeFotoClose = (index) => {
+    const updated = [...fotosClose];
+    updated.splice(index, 1);
+    refreshFotosClose(updated);
+  };
 
   document.getElementById('f-close-service').onsubmit = async (event) => {
     event.preventDefault();
@@ -592,14 +648,144 @@ export async function renderCloseScheduledServiceForm(servicoId) {
       valor: Number(document.getElementById('cs-valor').value || 0),
       formaPagamento: document.getElementById('cs-pagamento').value,
       descricao: document.getElementById('cs-desc').value,
+      observacoes: document.getElementById('cs-obs').value,
+      fotos: fotosClose,
       tecnicoId: tecnicoIdRaw ? Number(tecnicoIdRaw) : (servico.tecnicoId || null)
     });
 
-    await db.equipamentos.update(equipamentoId, {
-      ultimaManutencao: dataRealizada,
-      proximaManutencao: proximaData
-    });
+    if (equipamentoId) {
+      await db.equipamentos.update(equipamentoId, {
+        ultimaManutencao: dataRealizada,
+        proximaManutencao: proximaData
+      });
+    }
 
+    await renderClientDetail(servico.clientId);
+  };
+}
+
+export async function renderEditServiceForm(servicoId) {
+  const servico = await db.manutencoes.get(servicoId);
+  if (!servico) return;
+
+  const cliente = await db.clientes.get(servico.clientId);
+  const equipamentos = await db.equipamentos.where('clienteId').equals(servico.clientId).toArray();
+  const isAdminEmpresa = authService.isAdmin() && authService.getBusinessMode() === 'empresa';
+  const tecnicos = isAdminEmpresa ? authService.getUsers().filter((u) => u.role === 'tecnico') : [];
+  const fotosExistentes = servico.fotos || [];
+
+  openModal(`Editar Serviço - ${cliente?.nome || ''}`);
+
+  modalBody.innerHTML = `
+    <form id="f-edit-service">
+      <div class="form-group">
+        <label>Tipo de Serviço</label>
+        <input type="text" id="es-tipo" class="form-control" value="${servico.tipoServico || ''}">
+      </div>
+      <div class="form-group">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <label style="margin:0;">Equipamento</label>
+          <button type="button" onclick="window._addEquipmentFromEdit()" style="background:var(--primary); border:none; border-radius:8px; color:#fff; font-size:10px; font-weight:800; padding:5px 10px; cursor:pointer; display:flex; align-items:center; gap:4px;">
+            <span class="material-symbols-rounded" style="font-size:14px;">add</span>
+            NOVO
+          </button>
+        </div>
+        <select id="es-equipamento" class="form-control">
+          <option value="">Sem equipamento específico</option>
+          ${equipamentos.map((eq) => `<option value="${eq.id}" ${servico.equipamentoId === eq.id ? 'selected' : ''}>${eq.marca} - ${eq.btu} BTU - ${eq.localizacao || 'Local não informado'}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Data agendada</label>
+        <input type="datetime-local" id="es-data" class="form-control" value="${servico.dataAgendada ? toDateTimeInputValue(servico.dataAgendada) : ''}">
+      </div>
+      <div class="form-group">
+        <label>Descrição / Serviço a realizar</label>
+        <textarea id="es-desc" class="form-control" rows="3">${servico.descricao || ''}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Observações</label>
+        <textarea id="es-obs" class="form-control" rows="3" placeholder="Observações internas sobre o serviço...">${servico.observacoes || ''}</textarea>
+      </div>
+      ${isAdminEmpresa ? `
+      <div class="form-group">
+        <label>Técnico responsável</label>
+        <select id="es-tecnico" class="form-control">
+          <option value="">Técnico não atribuído</option>
+          ${tecnicos.map((t) => `<option value="${t.id}" ${servico.tecnicoId === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
+        </select>
+      </div>
+      ` : ''}
+      <div class="form-group">
+        <label>Fotos do serviço (até 3)</label>
+        <div id="es-fotos-preview" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+          ${fotosExistentes.map((f, i) => `
+            <div style="position:relative;">
+              <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
+              <button type="button" onclick="window._removeServicePhoto(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
+                <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
+              </button>
+            </div>
+          `).join('')}
+        </div>
+        ${fotosExistentes.length < 3 ? `
+        <input type="file" id="es-foto-input" class="form-control" accept="image/*" capture="environment" style="padding:8px;">
+        <button type="button" onclick="window._addServicePhoto()" style="width:100%; margin-top:8px; background:rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.25); border-radius:10px; color:#fff; padding:10px; cursor:pointer; font-size:11px; font-weight:700;">
+          <span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">add_photo_alternate</span>
+          ADICIONAR FOTO (${fotosExistentes.length}/3)
+        </button>
+        ` : `<p style="font-size:10px; opacity:0.5; margin:0;">Limite de 3 fotos atingido</p>`}
+      </div>
+      <button type="submit" class="btn-primary">SALVAR ALTERAÇÕES</button>
+    </form>
+  `;
+
+  let fotosAtuais = [...fotosExistentes];
+
+  window._addEquipmentFromEdit = () => renderEquipmentForm(servico.clientId, null, () => renderEditServiceForm(servicoId));
+
+  window._removeServicePhoto = (index) => {
+    fotosAtuais.splice(index, 1);
+    renderEditServiceForm._refreshPhotos(fotosAtuais, servicoId);
+  };
+
+  window._addServicePhoto = async () => {
+    const input = document.getElementById('es-foto-input');
+    if (!input?.files[0]) return;
+    if (fotosAtuais.length >= 3) return;
+    const base64 = await fileToBase64(input.files[0]);
+    fotosAtuais.push(base64);
+    renderEditServiceForm._refreshPhotos(fotosAtuais, servicoId);
+  };
+
+  renderEditServiceForm._refreshPhotos = (fotos, id) => {
+    const preview = document.getElementById('es-fotos-preview');
+    if (!preview) return;
+    preview.innerHTML = fotos.map((f, i) => `
+      <div style="position:relative;">
+        <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
+        <button type="button" onclick="window._removeServicePhoto(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
+          <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
+        </button>
+      </div>
+    `).join('');
+    const addBtn = preview.nextElementSibling?.nextElementSibling || preview.parentElement?.querySelector('button[onclick*="_addServicePhoto"]');
+    if (addBtn) addBtn.textContent = `ADICIONAR FOTO (${fotos.length}/3)`;
+    fotosAtuais = fotos;
+  };
+
+  document.getElementById('f-edit-service').onsubmit = async (event) => {
+    event.preventDefault();
+    const tecnicoIdRaw = document.getElementById('es-tecnico')?.value;
+    await db.manutencoes.update(servicoId, {
+      tipoServico: document.getElementById('es-tipo').value,
+      equipamentoId: Number(document.getElementById('es-equipamento').value) || servico.equipamentoId || null,
+      dataAgendada: document.getElementById('es-data').value ? new Date(document.getElementById('es-data').value) : servico.dataAgendada,
+      descricao: document.getElementById('es-desc').value,
+      observacoes: document.getElementById('es-obs').value,
+      fotos: fotosAtuais,
+      tecnicoId: tecnicoIdRaw ? Number(tecnicoIdRaw) : (servico.tecnicoId || null),
+    });
     await renderClientDetail(servico.clientId);
   };
 }
@@ -942,6 +1128,7 @@ export default {
   renderContactsImportForm,
   renderClientServiceForm,
   renderCloseScheduledServiceForm,
+  renderEditServiceForm,
   renderEquipmentForm,
   setClientFilter
 };

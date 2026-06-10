@@ -289,9 +289,10 @@ export async function renderDashboard(mainContent, headerContent, searchTerm = '
           </div>
           <span style="font-size:10px; font-weight:900; color:#0ea5e9;">${formatDateTime(service.dataAgendada)}</span>
         </div>
-        ${canManage ? `<div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:15px;">
+        ${canManage ? `<div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-top:15px;">
+          <button class="btn-primary" onclick="window.renderEditServiceForm(${service.id})" style="margin-top:0; background:#0ea5e9; font-size:9px; padding:10px 6px;">EDITAR</button>
           <button class="btn-primary" onclick="window.renderCloseScheduledServiceForm(${service.id})" style="margin-top:0; background:#ef4444; color:white; font-size:9px; padding:10px 6px;">FECHAR</button>
-          ${c ? `<button class="btn-primary" onclick="window.renderNewServiceLaunch(${c.id}, ${e?.id || 'null'})" style="margin-top:0; background:#7c3aed; font-size:9px; padding:10px 6px;">NOVO SERVIÇO</button>` : ''}
+          ${c ? `<button class="btn-primary" onclick="window.renderNewServiceLaunch(${c.id}, ${e?.id || 'null'})" style="margin-top:0; background:#7c3aed; font-size:9px; padding:10px 6px;">NOVO</button>` : '<div></div>'}
         </div>` : ''}
         <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:8px;">
           ${addressLink ? `<a class="btn-primary" href="${addressLink}" target="_blank" style="margin-top:0; background:#0ea5e9; font-size:9px; padding:10px 6px; text-decoration:none;">MAPS</a>` : `<button class="btn-primary" disabled style="margin-top:0; background:#334155; color:#94a3b8; font-size:9px; padding:10px 6px;">MAPS</button>`}
@@ -410,11 +411,16 @@ export async function showNotifications() {
       (diff === 0 ? 'Agendado para hoje' : `Agendado em ${diff} dias`);
 
     html += `
-      <div ${canManage ? `onclick="window.renderCloseScheduledServiceForm(${service.id})"` : ''} style="background:rgba(255,255,255,0.05); padding:10px; border-left:3px solid ${color}; border-radius:8px; cursor:${canManage ? 'pointer' : 'default'};">
+      <div style="background:rgba(255,255,255,0.05); padding:10px; border-left:3px solid ${color}; border-radius:8px;">
         <p style="margin:0; font-size:12px; font-weight:bold;">${c?.nome || 'Cliente'}</p>
         <p style="margin:2px 0 0 0; font-size:10px; opacity:0.7;">${service.tipoServico || 'Serviço'} • ${e ? `${e.marca} - ${e.localizacao || 'Local não informado'}` : 'Equipamento a definir'}</p>
         <p style="margin:5px 0 0 0; font-size:10px; color:${color}; font-weight:bold;">${txt} • ${formatDateTime(service.dataAgendada)}</p>
         ${tecnico ? `<p style="margin:4px 0 0 0; font-size:9px; color:#a78bfa; font-weight:700;">TÉCNICO: ${tecnico.name}</p>` : ''}
+        ${canManage ? `
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button class="btn-primary" onclick="window.renderEditServiceForm(${service.id})" style="margin-top:0; flex:1; background:#0ea5e9; font-size:9px; padding:8px 6px;">EDITAR</button>
+          <button class="btn-primary" onclick="window.renderCloseScheduledServiceForm(${service.id})" style="margin-top:0; flex:1; background:#22c55e; font-size:9px; padding:8px 6px;">FECHAR</button>
+        </div>` : ''}
       </div>
     `;
   }

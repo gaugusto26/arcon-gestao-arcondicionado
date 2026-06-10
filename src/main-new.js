@@ -10,7 +10,7 @@ import { authService } from './services/auth.js';
 
 // Importar módulos
 import { renderDashboard, showNotifications, setHomeFilter, renderMaintenanceForm, showFinancialReport, renderNewServicePrompt, renderNewServiceLaunch } from './modules/agenda/index.js';
-import { renderBairros, renderBairroDetail, renderClientDetail, renderBairroForm, renderFullPropertyForm, renderContactsImportForm, renderClientServiceForm, renderCloseScheduledServiceForm, renderEquipmentForm } from './modules/clientes/index.js';
+import { renderBairros, renderBairroDetail, renderClientDetail, renderBairroForm, renderFullPropertyForm, renderContactsImportForm, renderClientServiceForm, renderCloseScheduledServiceForm, renderEquipmentForm, renderEditServiceForm } from './modules/clientes/index.js';
 import { renderHistorico, gerarPDF, renderEquipmentHistory } from './modules/historico/index.js';
 import { renderMais, renderTechnicianForm, renderEditProfileForm, renderChangePasswordForm } from './modules/configuracoes/index.js';
 import { renderOrcamentos } from './modules/orcamentos/index.js';
@@ -337,6 +337,7 @@ function exposeGlobalFunctions() {
   window.renderClientServiceForm = authService.isEmployee() ? employeeBlocked : renderClientServiceForm;
   window.renderCloseScheduledServiceForm = authService.isEmployee() ? employeeBlocked : renderCloseScheduledServiceForm;
   window.renderEquipmentForm = authService.isEmployee() ? employeeBlocked : renderEquipmentForm;
+  window.renderEditServiceForm = renderEditServiceForm;
   
   // Configurações
   window.renderTechnicianForm = renderTechnicianForm;

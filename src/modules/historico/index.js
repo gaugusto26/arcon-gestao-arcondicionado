@@ -112,12 +112,17 @@ export async function renderHistorico(mainContent, headerContent) {
             ` : ''}
           </div>
           
-          <p style="font-size: 13px; font-style: italic; background:rgba(0,0,0,0.3); padding:15px; 
+          <p style="font-size: 13px; font-style: italic; background:rgba(0,0,0,0.3); padding:15px;
                     border-radius:15px; margin-top:12px; line-height:1.5; color:#eee;">
             ${m.descricao}
           </p>
-          ${e ? `<p style="font-size:10px; opacity:0.55; margin-top:-6px;">${e.marca} • ${e.localizacao || 'Local não informado'}</p>` : '<p style="font-size:10px; opacity:0.55; margin-top:-6px;">Serviço geral do cliente</p>'}
-          
+          ${m.observacoes ? `<p style="font-size:10px; opacity:0.65; margin-top:8px; padding:8px 12px; background:rgba(255,255,255,0.04); border-radius:8px; line-height:1.45;"><strong>Obs:</strong> ${m.observacoes}</p>` : ''}
+          ${e ? `<p style="font-size:10px; opacity:0.55; margin-top:-2px;">${e.marca} • ${e.localizacao || 'Local não informado'}</p>` : '<p style="font-size:10px; opacity:0.55; margin-top:-2px;">Serviço geral do cliente</p>'}
+          ${(m.fotos || []).length > 0 ? `
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+              ${m.fotos.map((f) => `<img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">`).join('')}
+            </div>
+          ` : ''}
           ${imgHtml}
           
           ${canManage ? `<div style="display:flex; justify-content:flex-end; margin-top:12px; gap:8px; flex-wrap:wrap;">
@@ -208,7 +213,13 @@ export async function renderEquipmentHistory(equipamentoId) {
             <span style="font-size:8px; font-weight:700; color:${cor};">${m.tipoServico || 'PREVENTIVA'}</span>
           </div>
           <p style="margin:4px 0; font-size:10px; opacity:0.8;">${desc.length > 80 ? desc.substring(0, 80) + '...' : desc}</p>
+          ${m.observacoes ? `<p style="margin:4px 0; font-size:9px; opacity:0.6;"><strong>Obs:</strong> ${m.observacoes}</p>` : ''}
           ${m.valor ? `<p style="margin:4px 0 0 0; font-size:10px; font-weight:700; color:#22c55e;">R$ ${Number(m.valor).toFixed(2)}</p>` : ''}
+          ${(m.fotos || []).length > 0 ? `
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+              ${m.fotos.map((f) => `<img src="${f}" style="width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">`).join('')}
+            </div>
+          ` : ''}
         </div>
       `}).join('') : '<p style="font-size:10px; opacity:0.5;">Nenhuma manutenção registrada</p>'}
     </div>
