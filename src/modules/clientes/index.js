@@ -579,23 +579,8 @@ export async function renderCloseScheduledServiceForm(servicoId) {
       ` : ''}
       <div class="form-group">
         <label>Fotos do serviço (até 3)</label>
-        <div id="cs-fotos-preview" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
-          ${(servico.fotos || []).map((f, i) => `
-            <div style="position:relative;">
-              <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
-              <button type="button" onclick="window._removeFotoClose(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
-                <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
-              </button>
-            </div>
-          `).join('')}
-        </div>
-        ${(servico.fotos || []).length < 3 ? `
-        <input type="file" id="cs-foto-input" class="form-control" accept="image/*" capture="environment" style="padding:8px;">
-        <button type="button" onclick="window._addFotoClose()" style="width:100%; margin-top:8px; background:rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.25); border-radius:10px; color:#fff; padding:10px; cursor:pointer; font-size:11px; font-weight:700;">
-          <span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">add_photo_alternate</span>
-          ADICIONAR FOTO (${(servico.fotos || []).length}/3)
-        </button>
-        ` : `<p style="font-size:10px; opacity:0.5; margin:0;">Limite de 3 fotos atingido</p>`}
+        <input type="file" id="cs-foto-input" accept="image/*" capture="environment" style="display:none;">
+        <div id="cs-fotos-container"></div>
       </div>
       <button type="submit" class="btn-primary">FECHAR SERVIÇO</button>
     </form>
@@ -605,32 +590,45 @@ export async function renderCloseScheduledServiceForm(servicoId) {
 
   let fotosClose = [...(servico.fotos || [])];
 
-  const refreshFotosClose = (fotos) => {
-    const preview = document.getElementById('cs-fotos-preview');
-    if (!preview) return;
-    preview.innerHTML = fotos.map((f, i) => `
-      <div style="position:relative;">
-        <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
-        <button type="button" onclick="window._removeFotoClose(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
-          <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
+  function renderFotosClose() {
+    const container = document.getElementById('cs-fotos-container');
+    if (!container) return;
+    const canAdd = fotosClose.length < 3;
+    container.innerHTML = `
+      ${fotosClose.length > 0 ? `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+        ${fotosClose.map((f, i) => `
+          <div style="position:relative;">
+            <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
+            <button type="button" onclick="window._csRemoveFoto(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
+              <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
+            </button>
+          </div>
+        `).join('')}
+      </div>` : ''}
+      ${canAdd ? `
+        <button type="button" onclick="document.getElementById('cs-foto-input').click()" style="width:100%; background:rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.25); border-radius:10px; color:#fff; padding:10px; cursor:pointer; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span class="material-symbols-rounded" style="font-size:18px;">add_photo_alternate</span>
+          ADICIONAR FOTO (${fotosClose.length}/3)
         </button>
-      </div>
-    `).join('');
-    fotosClose = fotos;
+      ` : `<p style="font-size:10px; opacity:0.5; margin:0;">Limite de 3 fotos atingido</p>`}
+    `;
+  }
+
+  window._csRemoveFoto = (index) => {
+    fotosClose.splice(index, 1);
+    renderFotosClose();
   };
 
-  window._addFotoClose = async () => {
-    const input = document.getElementById('cs-foto-input');
-    if (!input?.files[0] || fotosClose.length >= 3) return;
-    const base64 = await resizeServicePhoto(input.files[0]);
-    refreshFotosClose([...fotosClose, base64]);
+  document.getElementById('cs-foto-input').onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || fotosClose.length >= 3) return;
+    const base64 = await resizeServicePhoto(file);
+    fotosClose.push(base64);
+    e.target.value = '';
+    renderFotosClose();
   };
 
-  window._removeFotoClose = (index) => {
-    const updated = [...fotosClose];
-    updated.splice(index, 1);
-    refreshFotosClose(updated);
-  };
+  renderFotosClose();
 
   document.getElementById('f-close-service').onsubmit = async (event) => {
     event.preventDefault();
@@ -718,23 +716,8 @@ export async function renderEditServiceForm(servicoId) {
       ` : ''}
       <div class="form-group">
         <label>Fotos do serviço (até 3)</label>
-        <div id="es-fotos-preview" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
-          ${fotosExistentes.map((f, i) => `
-            <div style="position:relative;">
-              <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
-              <button type="button" onclick="window._removeServicePhoto(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
-                <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
-              </button>
-            </div>
-          `).join('')}
-        </div>
-        ${fotosExistentes.length < 3 ? `
-        <input type="file" id="es-foto-input" class="form-control" accept="image/*" capture="environment" style="padding:8px;">
-        <button type="button" onclick="window._addServicePhoto()" style="width:100%; margin-top:8px; background:rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.25); border-radius:10px; color:#fff; padding:10px; cursor:pointer; font-size:11px; font-weight:700;">
-          <span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">add_photo_alternate</span>
-          ADICIONAR FOTO (${fotosExistentes.length}/3)
-        </button>
-        ` : `<p style="font-size:10px; opacity:0.5; margin:0;">Limite de 3 fotos atingido</p>`}
+        <input type="file" id="es-foto-input" accept="image/*" capture="environment" style="display:none;">
+        <div id="es-fotos-container"></div>
       </div>
       <button type="submit" class="btn-primary">SALVAR ALTERAÇÕES</button>
     </form>
@@ -742,37 +725,47 @@ export async function renderEditServiceForm(servicoId) {
 
   let fotosAtuais = [...fotosExistentes];
 
-  window._addEquipmentFromEdit = () => renderEquipmentForm(servico.clientId, null, () => renderEditServiceForm(servicoId));
-
-  window._removeServicePhoto = (index) => {
-    fotosAtuais.splice(index, 1);
-    renderEditServiceForm._refreshPhotos(fotosAtuais, servicoId);
-  };
-
-  window._addServicePhoto = async () => {
-    const input = document.getElementById('es-foto-input');
-    if (!input?.files[0]) return;
-    if (fotosAtuais.length >= 3) return;
-    const base64 = await resizeServicePhoto(input.files[0]);
-    fotosAtuais.push(base64);
-    renderEditServiceForm._refreshPhotos(fotosAtuais, servicoId);
-  };
-
-  renderEditServiceForm._refreshPhotos = (fotos, id) => {
-    const preview = document.getElementById('es-fotos-preview');
-    if (!preview) return;
-    preview.innerHTML = fotos.map((f, i) => `
-      <div style="position:relative;">
-        <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
-        <button type="button" onclick="window._removeServicePhoto(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
-          <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
+  function renderFotosEdit() {
+    const container = document.getElementById('es-fotos-container');
+    if (!container) return;
+    const canAdd = fotosAtuais.length < 3;
+    container.innerHTML = `
+      ${fotosAtuais.length > 0 ? `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+        ${fotosAtuais.map((f, i) => `
+          <div style="position:relative;">
+            <img src="${f}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.15);">
+            <button type="button" onclick="window._esRemoveFoto(${i})" style="position:absolute; top:-6px; right:-6px; background:#ef4444; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
+              <span class="material-symbols-rounded" style="font-size:12px; color:#fff;">close</span>
+            </button>
+          </div>
+        `).join('')}
+      </div>` : ''}
+      ${canAdd ? `
+        <button type="button" onclick="document.getElementById('es-foto-input').click()" style="width:100%; background:rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.25); border-radius:10px; color:#fff; padding:10px; cursor:pointer; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span class="material-symbols-rounded" style="font-size:18px;">add_photo_alternate</span>
+          ADICIONAR FOTO (${fotosAtuais.length}/3)
         </button>
-      </div>
-    `).join('');
-    const addBtn = preview.nextElementSibling?.nextElementSibling || preview.parentElement?.querySelector('button[onclick*="_addServicePhoto"]');
-    if (addBtn) addBtn.textContent = `ADICIONAR FOTO (${fotos.length}/3)`;
-    fotosAtuais = fotos;
+      ` : `<p style="font-size:10px; opacity:0.5; margin:0;">Limite de 3 fotos atingido</p>`}
+    `;
+  }
+
+  window._esRemoveFoto = (index) => {
+    fotosAtuais.splice(index, 1);
+    renderFotosEdit();
   };
+
+  document.getElementById('es-foto-input').onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || fotosAtuais.length >= 3) return;
+    const base64 = await resizeServicePhoto(file);
+    fotosAtuais.push(base64);
+    e.target.value = '';
+    renderFotosEdit();
+  };
+
+  renderFotosEdit();
+
+  window._addEquipmentFromEdit = () => renderEquipmentForm(servico.clientId, null, () => renderEditServiceForm(servicoId));
 
   document.getElementById('f-edit-service').onsubmit = async (event) => {
     event.preventDefault();
